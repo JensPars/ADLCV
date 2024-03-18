@@ -23,6 +23,8 @@ Combine the generated instances with the Copy-Paste strategy and augment your tr
 ### Brain-storm Task 5: In-painting? Scaling laws? Additional control? LLM generation for captions? etc.
 
 # Reading list
+Learning Vision from Models Rivals Learning Vision from Data
+https://github.com/google-research/syn-rep-learn/blob/main/SynCLR/assets/synclr_paper.pdf
 
 Simple Copy-Paste is a Strong Data Augmentation Method for Instance Segmentation
 https://arxiv.org/pdf/2012.07177.pdf
