@@ -10,6 +10,7 @@ In this project, you could work on the following tasks:
 
 ### Task 1: Reproduce a simple Copy-Paste augmentation algorithm [3]
 Evaluate the results of this augmentation algorithm on a standard instance segmentation problem. You can also compare the results with several other baselines, such as standard augmentation, RandAugment, or AutoAugment.
+https://github.com/open-mmlab/mmdetection/tree/master/configs/simple_copy_paste
 
 ### Task 2: Generate new instances
 Use Stable diffusion or ControlNet to generate new instances for the target object categories.
