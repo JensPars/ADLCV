@@ -10,6 +10,7 @@ In this project, you could work on the following tasks:
 
 ### Task 1: Reproduce a simple Copy-Paste augmentation algorithm [3]
 Evaluate the results of this augmentation algorithm on a standard instance segmentation problem. You can also compare the results with several other baselines, such as standard augmentation, RandAugment, or AutoAugment.
+
 https://github.com/open-mmlab/mmdetection/tree/master/configs/simple_copy_paste
 https://mmdetection.readthedocs.io/en/v2.25.0/_modules/mmdet/datasets/pipelines/transforms.html
 
