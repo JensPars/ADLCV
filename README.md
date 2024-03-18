@@ -13,6 +13,7 @@ Evaluate the results of this augmentation algorithm on a standard instance segme
 
 https://github.com/open-mmlab/mmdetection/tree/master/configs/simple_copy_paste
 https://mmdetection.readthedocs.io/en/v2.25.0/_modules/mmdet/datasets/pipelines/transforms.html
+mmdet.datasets.pipelines.transforms.CopyPaste
 
 ### Task 2: Generate new instances
 Use Stable diffusion or ControlNet to generate new instances for the target object categories.
