@@ -1,0 +1,9 @@
+transformers
+torch
+torchvision
+diffusers
+matplotlib
+accelerate
+peft
+timm
+efficientvit
