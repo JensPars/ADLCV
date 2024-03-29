@@ -6,4 +6,7 @@ matplotlib
 accelerate
 peft
 timm
-efficientvit
+#efficientvit
+numpy
+detectron2 @ git+https://github.com/facebookresearch/detectron2.git
+scipy
