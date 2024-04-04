@@ -6,5 +6,5 @@ matplotlib
 accelerate
 peft
 timm
-#efficientvit
+efficientvit
 numpy
