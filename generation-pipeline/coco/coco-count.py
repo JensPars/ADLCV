@@ -40,8 +40,9 @@ plt.xlabel('Class')
 plt.ylabel('Instance Count')
 plt.title('Class Instance Distribution')
 plt.tight_layout()
-plt.savefig('/zhome/ca/9/146686/ADLCV/generation-pipeline/class_freqs.png')
+plt.savefig('/generation-pipeline/class_freqs.png')
 
 # Save histogram as JSON
-with open('/zhome/ca/9/146686/ADLCV/generation-pipeline/class_counts.json', 'w') as f:
+with open('/generation-pipeline/class_counts.json', 'w') as f:
     json.dump(sorted_class_counts, f)
+    

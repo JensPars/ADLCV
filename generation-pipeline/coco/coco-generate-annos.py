@@ -4,10 +4,10 @@ from tqdm import tqdm
 import json
 import matplotlib.pyplot as plt
 
-classes = {'elephant': 3905, 'dog': 3774, 'zebra': 3685, 'giraffe': 3596, 'teddy bear': 3442, 'cat': 3301, 'mouse': 1517}
+classes = {'cat': 3301,'dog': 3774,'horse': 4666,'sheep': 6654,'cow': 5686,'elephant': 3905,'bear': 903,'zebra': 3685,'giraffe': 3596}
 
 # Load the COCO annotation file
-coco_annotation_file = '/work3/s194649/annotations/instances_train2014.json'
+coco_annotation_file = '/zhome/ca/9/146686/annotations/instances_train2017.json'
 coco = COCO(coco_annotation_file)
 
 # Create a new dictionary to store the subset annotations
@@ -35,7 +35,7 @@ image_ids = set()
 for ann in tqdm(coco.dataset['annotations']):
     if ann['category_id'] in category_id_map:
         ann['category_id'] = category_id_map[ann['category_id']]
-        ann.pop('segmentation', None)  # Remove segmentation (masks)
+        #ann.pop('segmentation', None)  # Remove segmentation (masks)
         subset_annotations['annotations'].append(ann)
         image_ids.add(ann['image_id'])
 
