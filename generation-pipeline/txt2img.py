@@ -1,6 +1,4 @@
-import os
-os.environ['TRANSFORMERS_CACHE'] = "/work3/s194649/cache"
-os.environ['HF_HOME'] = '/work3/s194649/cache'
+from setupHF_cache import *
 import torch
 from diffusers import StableDiffusionPipeline
 from diffusers import AutoPipelineForText2Image

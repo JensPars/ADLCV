@@ -1,8 +1,6 @@
-import os
+from setupHF_cache import *
 import pickle
 import zlib
-os.environ['HF_HOME'] = '/work3/s194649/cache'
-os.environ['TRANSFORMERS_CACHE'] = "/work3/s194649/cache"
 from glob import glob
 from transformers import pipeline
 from PIL import Image

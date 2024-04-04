@@ -1,7 +1,6 @@
-import os
+from setupHF_cache import *
 import numpy as np
-os.environ['HF_HOME'] = '/work3/s194649/cache'
-os.environ['TRANSFORMERS_CACHE'] = "/work3/s194649/cache"
+
 palette = np.asarray([
     [0, 0, 0],
     [120, 120, 120],
