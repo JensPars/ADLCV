@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 classes = {'cat': 3301,'dog': 3774,'horse': 4666,'sheep': 6654,'cow': 5686,'elephant': 3905,'bear': 903,'zebra': 3685,'giraffe': 3596}
 
 # Load the COCO annotation file
-coco_annotation_file = '/zhome/ca/9/146686/annotations/instances_train2017.json'
+coco_annotation_file = 'path2anno '
 coco = COCO(coco_annotation_file)
 
 # Create a new dictionary to store the subset annotations
@@ -45,7 +45,7 @@ for image in coco.dataset['images']:
         subset_annotations['images'].append(image)
 
 # Save the subset annotations as a JSON file
-output_file = 'coco_subset_annotations.json'
+output_file = 'coco_subset_annotations_val.json'
 with open(output_file, 'w') as f:
     json.dump(subset_annotations, f)
 

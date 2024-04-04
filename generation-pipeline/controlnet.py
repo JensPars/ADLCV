@@ -165,9 +165,7 @@ from diffusers.utils import load_image
 
 image_processor = AutoImageProcessor.from_pretrained("openmmlab/upernet-convnext-small")
 image_segmentor = UperNetForSemanticSegmentation.from_pretrained("openmmlab/upernet-convnext-small")
-
 image = Image.open("saved_image.jpg").convert('RGB')
-
 pixel_values = image_processor(image, return_tensors="pt").pixel_values
 
 with torch.no_grad():

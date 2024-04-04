@@ -6,7 +6,7 @@ import json
 import matplotlib.pyplot as plt
 
 # Load the COCO annotation file
-coco_annotation_file = '/work3/s194649/annotations/instances_train2014.json'
+coco_annotation_file = '/path2anno'
 coco = COCO(coco_annotation_file)
 
 # Get the category IDs and names

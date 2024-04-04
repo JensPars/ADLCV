@@ -4,7 +4,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import json
 
-coco_annotation_file = '/work3/s194649/annotations/instances_train2014.json'
+coco_annotation_file = '/path2anno'
 # Load the COCO annotation file
 coco = COCO(coco_annotation_file)
 # Get all categories
