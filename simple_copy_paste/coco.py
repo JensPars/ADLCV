@@ -1,7 +1,7 @@
 import os
 import cv2
 from torchvision.datasets import CocoDetection
-from simple_copy_paste import copy_paste_class
+from simple_copy_paste.simple_copy_paste import copy_paste_class
 
 min_keypoints_per_image = 10
 
@@ -49,6 +49,9 @@ class CocoDetectionCP(CocoDetection):
             if has_valid_annotation(anno):
                 ids.append(img_id)
         self.ids = ids
+    
+    def collate_fn(_, batch):
+        return tuple(zip(*batch))
 
     def load_example(self, index):
         img_id = self.ids[index]

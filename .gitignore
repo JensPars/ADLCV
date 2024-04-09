@@ -9,3 +9,4 @@ assets/checkpoints/xl0.pt
 generation-pipeline/__pycache__/
 __pycache__/
 *.pyc
+wandb/
