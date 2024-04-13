@@ -7,10 +7,17 @@ import os
 import albumentations as A
 from simple_copy_paste.simple_copy_paste import CopyPaste
 import wandb
-from torchvision.transforms import v2
+import torch
+from torchvision.transforms import v2 as T
 
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
+
+def get_transform():
+    transforms = []
+    transforms.append(T.ToDtype(torch.float, scale=True))
+    transforms.append(T.ToPureTensor())
+    return T.Compose(transforms)
 
 if __name__ == "__main__":
     num_classes = 9  # Number of classes in the dataset
@@ -27,7 +34,7 @@ if __name__ == "__main__":
 
     # Hyperparameters 
     hparams = {
-        'lr': 0.001,
+        'lr': 0.005,
         'batch_size': 8
     }
 
@@ -47,7 +54,7 @@ if __name__ == "__main__":
         train_file='coco_subset_annotations.json', 
         val_dir='/work3/s194633/val2017', 
         val_file='coco_subset_annotations_val.json', 
-        transforms=None, 
+        transforms=get_transform(), 
         batch_size=hparams['batch_size']
     )
 

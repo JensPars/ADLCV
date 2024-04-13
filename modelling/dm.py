@@ -10,7 +10,7 @@ class CocoDataModule(LightningDataModule):
     def __init__(self, train_dir, train_file, val_dir, val_file, transforms, batch_size):
         super().__init__()
         self.train_dataset = CustomCocoDetection(train_dir, train_file, transforms=transforms)
-        self.val_dataset = CustomCocoDetection(val_dir, val_file, transforms=None)  # Example: no transforms for validation 
+        self.val_dataset = CustomCocoDetection(val_dir, val_file, transforms=transforms)
         #self.train_dataset = CocoDetectionCP(train_dir, train_file, transforms=transforms)
 
         self.batch_size = batch_size

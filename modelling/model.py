@@ -22,7 +22,7 @@ class MaskRCNNLightning(LightningModule):
 
         # Log for both progress bar and logging
         self.log_dict(loss_dict, on_step=True, on_epoch=True) 
-        self.log("train_loss", loss, on_step=True, on_epoch=True)
+        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
 
         return loss
 
@@ -50,6 +50,11 @@ class MaskRCNNLightning(LightningModule):
         return loss
 
     def configure_optimizers(self):
-        return torch.optim.AdamW(self.parameters(), lr=self.hparams.lr)
+        return torch.optim.SGD(
+    self.parameters(),
+    lr=0.005,
+    momentum=0.9,
+    weight_decay=0.0005
+)
     
 
