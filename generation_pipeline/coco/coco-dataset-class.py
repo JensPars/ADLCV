@@ -8,11 +8,11 @@ from torchvision.models.detection import maskrcnn_resnet50_fpn_v2
 
 # Set the root directory and annotation file path
 root = "/work3/s194649/train2017"
-anno = "/zhome/ca/9/146686/ADLCV/coco_subset_annotations.json"
+anno = "/zhome/ca/9/146686/ADLCV/bear_subset_annotations_train.json"
 
 dataset = CocoDetection(root=root, annFile=anno)
 
-coco = COCO("coco_subset_annotations.json")
+coco = COCO(anno)
 
 # Get the category IDs and their corresponding names
 cat_ids = coco.getCatIds()
