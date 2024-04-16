@@ -6,5 +6,10 @@ matplotlib
 accelerate
 peft
 timm
-efficientvit
+#efficientvit
 numpy
+pytorch-lightning
+wandb
+opencv-python
+albumentations
+pycocotools

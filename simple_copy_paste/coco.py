@@ -1,15 +1,24 @@
 import os
+import torch
 import cv2
 from torchvision.datasets import CocoDetection
-from simple_copy_paste import copy_paste_class
+from simple_copy_paste.simple_copy_paste import copy_paste_class
+from torchvision import tv_tensors
+import numpy as np
+from torchvision.io import read_image
+
+from torchvision.transforms.v2 import functional as F
 
 min_keypoints_per_image = 10
+
 
 def _count_visible_keypoints(anno):
     return sum(sum(1 for v in ann["keypoints"][2::3] if v > 0) for ann in anno)
 
+
 def _has_only_empty_bbox(anno):
     return all(any(o <= 1 for o in obj["bbox"][2:]) for obj in anno)
+
 
 def has_valid_annotation(anno):
     # if it's empty, there is no annotation
@@ -29,17 +38,11 @@ def has_valid_annotation(anno):
 
     return False
 
+
 @copy_paste_class
 class CocoDetectionCP(CocoDetection):
-    def __init__(
-        self,
-        root,
-        annFile,
-        transforms
-    ):
-        super(CocoDetectionCP, self).__init__(
-            root, annFile, None, None, transforms
-        )
+    def __init__(self, root, annFile, transforms):
+        super(CocoDetectionCP, self).__init__(root, annFile, None, None, transforms)
 
         # filter images without detection annotations
         ids = []
@@ -50,28 +53,84 @@ class CocoDetectionCP(CocoDetection):
                 ids.append(img_id)
         self.ids = ids
 
+    def collate_fn(_, batch):
+        return tuple(zip(*batch))
+
     def load_example(self, index):
         img_id = self.ids[index]
         ann_ids = self.coco.getAnnIds(imgIds=img_id)
         target = self.coco.loadAnns(ann_ids)
 
-        path = self.coco.loadImgs(img_id)[0]['file_name']
+        path = self.coco.loadImgs(img_id)[0]["file_name"]
         image = cv2.imread(os.path.join(self.root, path))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        #convert all of the target segmentations to masks
-        #bboxes are expected to be (y1, x1, y2, x2, category_id)
+        # convert all of the target segmentations to masks
+        # bboxes are expected to be (y1, x1, y2, x2, category_id)
         masks = []
         bboxes = []
         for ix, obj in enumerate(target):
             masks.append(self.coco.annToMask(obj))
-            bboxes.append(obj['bbox'] + [obj['category_id']] + [ix])
+            bboxes.append(obj["bbox"] + [obj["category_id"]] + [ix])
 
-        #pack outputs into a dict
-        output = {
-            'image': image,
-            'masks': masks,
-            'bboxes': bboxes
-        }
-        
+        # pack outputs into a dict
+        output = {"image": image, "masks": masks, "bboxes": bboxes}
+
         return self.transforms(**output)
+
+
+class CustomCocoDetection(CocoDetection):
+    def __init__(self, img_folder, ann_file, transforms=None):
+        super().__init__(img_folder, ann_file, transforms)
+        self.img_folder = img_folder
+
+    @staticmethod
+    def collate_fn(batch):
+        images = list(image for image, _ in batch)
+        targets = list(target for _, target in batch)
+        return images, targets
+
+    def __getitem__(self, index):
+        image_id = self.ids[index]
+        ann_ids = self.coco.getAnnIds(imgIds=image_id)
+        target = self.coco.loadAnns(ann_ids)
+
+        # Process target to match your desired format
+        output_target = {}
+        output_target["boxes"] = []
+        output_target["labels"] = []
+        output_target["masks"] = []
+
+        for obj in target:
+            # Convert boxes to x1, y1, x2, y2
+            x, y, w, h = obj["bbox"]
+            x2 = x + w
+            y2 = y + h
+            output_target["boxes"].append(torch.tensor([x, y, x2, y2]).float())
+
+            output_target["labels"].append(obj["category_id"])
+
+            # Assuming masks are RLE encoded
+            mask = self.coco.annToMask(obj)
+            output_target["masks"].append(mask)
+
+        path = self.coco.loadImgs(image_id)[0]["file_name"]
+        image = read_image(os.path.join(self.img_folder, path))
+        image = tv_tensors.Image(image)
+        # Convert to tensors
+        output_target["boxes"] = torch.tensor(
+            np.array(output_target["boxes"])
+        ).float()  # Ensure float for bounding boxes
+        output_target["labels"] = torch.tensor(output_target["labels"]).long()
+        output_target["masks"] = torch.tensor(np.array(output_target["masks"]))
+        target = {}
+        target["boxes"] = tv_tensors.BoundingBoxes(
+            output_target["boxes"], format="XYXY", canvas_size=F.get_size(image)
+        )
+        target["masks"] = tv_tensors.Mask(output_target["masks"])
+        target["labels"] = output_target["labels"]
+
+        if self.transforms is not None:
+            image, target = self.transforms(image, target)
+
+        return image, target

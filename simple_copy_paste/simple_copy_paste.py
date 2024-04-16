@@ -5,6 +5,7 @@ import numpy as np
 import albumentations as A
 from copy import deepcopy
 from skimage.filters import gaussian
+import torch
 
 def image_copy_paste(img, paste_img, alpha, blend=True, sigma=1):
     if alpha is not None:
@@ -308,8 +309,29 @@ def copy_paste_class(dataset_class):
             img_data = self.copy_paste(**img_data, **paste_img_data)
             img_data = self.post_transforms(**img_data)
             img_data['paste_index'] = paste_idx
+        
+        
 
-        return img_data
+        
+        bboxes = torch.tensor(np.array([torch.tensor(x[:4]) for x in img_data["bboxes"]]))
+        labels =torch.tensor(np.array([torch.tensor(x[-2]) for x in img_data["bboxes"]]))
+        masks = torch.tensor(np.array([torch.tensor(x).float() for x in img_data["masks"]]))
+        image = torch.tensor(img_data["image"]).float().permute(2, 0, 1)
+
+        if len(bboxes) == 0:
+            idx = random.randint(0, self.__len__() - 1)
+            return self.__getitem__(idx)
+            
+
+
+        #bboxes from x,y,w,h to x1,y1,x2,y2
+        bboxes[:, 2:] += bboxes[:, :2]
+        bboxes = bboxes.float()
+        labels = labels.long()
+        masks = masks.permute(1, 2, 0)
+
+
+        return image, {"masks": masks, "boxes": bboxes, "labels": labels}
 
     setattr(dataset_class, '_split_transforms', _split_transforms)
     setattr(dataset_class, '__getitem__', __getitem__)

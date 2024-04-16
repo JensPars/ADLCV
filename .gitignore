@@ -9,6 +9,8 @@ assets/checkpoints/xl0.pt
 generation-pipeline/__pycache__/
 __pycache__/
 *.pyc
+wandb/
+
 generation_pipeline/fig/1/giraffe/img_263936987.jpg
 generation_pipeline/fig/1/giraffe/img_483911026.jpg
 generation_pipeline/fig/1/giraffe/img_692811534.jpg
