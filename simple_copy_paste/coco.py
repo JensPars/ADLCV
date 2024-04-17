@@ -6,6 +6,7 @@ from simple_copy_paste.simple_copy_paste import copy_paste_class
 from torchvision import tv_tensors
 import numpy as np
 from torchvision.io import read_image
+from PIL import Image
 
 from torchvision.transforms.v2 import functional as F
 
@@ -134,3 +135,31 @@ class CustomCocoDetection(CocoDetection):
             image, target = self.transforms(image, target)
 
         return image, target
+    
+class CustomCocoSegmentation(CocoDetection):
+    def __init__(self, img_folder, ann_file, transforms_im=None, transforms_mask=None):
+        super().__init__(img_folder, ann_file, transforms_im, transforms_mask)
+        self.img_folder = img_folder
+        self.transforms_im = transforms_im
+        self.transforms_mask = transforms_mask
+
+    def __getitem__(self, index):
+        image_id = self.ids[index]
+        ann_ids = self.coco.getAnnIds(imgIds=image_id)
+
+        # Load annotation details
+        annotations = [self.coco.loadAnns([ann_id])[0] for ann_id in ann_ids]
+
+        path = self.coco.loadImgs(image_id)[0]["file_name"]
+        image = Image.open(os.path.join(self.img_folder, path)).convert("RGB")
+
+        mask = np.zeros((image.size[1], image.size[0]))
+        for obj in annotations:
+            segmentation_mask = self.coco.annToMask(obj)
+            mask[segmentation_mask == 1] = obj["category_id"]
+
+        if self.transforms is not None:
+            image_t = self.transforms_im(image)
+            target = self.transforms_mask(mask)
+
+        return image_t.squeeze(), target.squeeze()
