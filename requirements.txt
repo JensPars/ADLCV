@@ -8,6 +8,8 @@ peft
 timm
 #efficientvit
 numpy
+opencv-python
+albumentations
 pytorch-lightning
 wandb
 opencv-python
