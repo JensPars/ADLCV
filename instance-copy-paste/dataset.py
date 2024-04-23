@@ -37,10 +37,8 @@ class SynData(torch.utils.data.Dataset):
             A.RandomScale(scale_limit=(-0.9, 1), p=1), #LargeScaleJitter from scale of 0.1 to 2
             A.PadIfNeeded(img_size, img_size, border_mode=0), #pads with image in the center, not the top left like the paper
             A.Resize(img_size, img_size, p=1),
-            #A.RandomCrop(img_size, img_size, p=1),            
-            #A.RandomResizedCrop(img_size, img_size, scale=(0.5, 1.0), ratio=(0.75, 1.3333333333333333), p=1),
             A.HorizontalFlip(p=0.5),
-            #A.RandomRotate90(p=0.5),
+            A.RandomRotate90(p=0.2),
         ], bbox_params=A.BboxParams(format="coco", min_visibility=0.05))
 
     def _get_bbox(self, mask):
@@ -68,6 +66,8 @@ class SynData(torch.utils.data.Dataset):
         """
         # Load synthetic image
         syn_img = Image.open(self.syn_imgs[idx]).convert("RGB")
+        syn_img_class = self.syn_imgs[idx].split("/")[-2]
+        # TODO: Map the class to the label
         syn_img = np.array(syn_img)
         # Load synthetic mask
         syn_mask = read_and_decompress(self.syn_lbls[idx])
@@ -78,7 +78,8 @@ class SynData(torch.utils.data.Dataset):
         output = {
             "image": syn_img,
             "masks": [syn_mask],
-            "bboxes": [syn_bbox]
+            "bboxes": [syn_bbox],
+            'labels': syn_img_class
         }
         return output
 
@@ -148,21 +149,43 @@ class COCO_DETECTION(Dataset):
         coco_annotation = self.coco.loadAnns(ann_ids)
         masks = []
         bboxes = []
+        labels = []
 
         for ann in coco_annotation:
             mask = self.coco.annToMask(ann)
             masks.append(mask)
-            bboxes.append(ann['bbox']+[ann['category_id']])
+            bboxes.append(ann['bbox'])
+            labels.append(ann['category_id'])
 
         output = {
             "image": img,
             "masks": masks,
             "bboxes": bboxes,
+            "labels": labels
         }
         return output
+    def post_process(self, img, target):
+        if not isinstance(img, torch.Tensor):
+            img = torch.from_numpy(img.transpose(2, 0, 1))
+        
+        mapped_labels = []
+        for label in target['labels']:
+            if isinstance(label, str):
+                mapped_labels.append(self.coco.getCatIds(catNms=label))
+            else:
+                mapped_labels.append(label)
+            
+        target = {
+            "masks": [torch.as_tensor(mask).float() for mask in target["masks"]],
+            "boxes": [torch.as_tensor(box).float() for box in target["boxes"]],
+            "labels": [torch.as_tensor(label).float() for label in mapped_labels]
+        }
+
+        return img, target
 
     def __getitem__(self, idx):
         coco_data = self._get_coco_data(idx)
+
         if self.transform:
             coco_data = self.transform(**coco_data)
         # Remove the segmentations masks that are all zeros
@@ -171,8 +194,17 @@ class COCO_DETECTION(Dataset):
         coco_data["masks"] = masks
         # Apply instance copy-paste augmentation
         if self.instance_copy_paste:
-            coco_data = self.instance_copy_paste(**coco_data)
-        return coco_data
+            img, target = self.instance_copy_paste(**coco_data)
+        else:
+            img = coco_data["image"]
+            target = {
+                "masks": coco_data["masks"],
+                "bboxes": coco_data["bboxes"],
+                "labels": coco_data["labels"]
+            }
+
+        img, target = self.post_process(img, target)
+        return img, target
 
 def _count_visible_keypoints(anno):
     return sum(sum(1 for v in ann["keypoints"][2::3] if v > 0) for ann in anno)

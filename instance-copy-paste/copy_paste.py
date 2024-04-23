@@ -4,12 +4,14 @@ import random
 from PIL import Image
 from typing import List, Optional
 import albumentations as A
+from skimage.filters import gaussian
+
 class InstanceRetriever():
     def __init__(self, instance_pool:torch.utils.data.Dataset):
         self.instance_pool = instance_pool
 
     def get_instances(self, n_instances:int):
-        # n_instances = random.randint(1, n_instances) #? Maybe to vary the number of instances pasted
+        n_instances = random.randint(1, n_instances) #? Maybe to vary the number of instances pasted
         instances = []
         for i in range(n_instances):
             instances.append(self.instance_pool[random.randint(0, len(self.instance_pool)-1)])
@@ -23,33 +25,60 @@ class InstanceCopyPaste():
         self.n_instances = n_instances
         self.layering = layering # TODO: Implement the layering
         self.min_visible_keyspoint = min_visible_keyspoint
-    def __call__(self, image, masks, bboxes):
-        return self.copy_paste(image, masks, bboxes)
 
-    def copy_paste(self, image, masks, bboxes):
-        """
+    def __call__(self, image, masks, bboxes, labels):
+        return self.copy_paste(image, masks, bboxes, labels)
 
-        """
+    def copy_paste(self, image, masks, bboxes, labels):
+
         # Background Image
         background = Image.fromarray(image)
         # Collect new instances to paste onto the background
         instances = self.instance_retriever.get_instances(self.n_instances)
         new_masks = []
         new_bboxes = []
-
+        # Paste the new instances onto the background
         for instance in instances:
-            background, new_instance_mask, new_instance_bbox = self._paste_single_instance(instance['image'], instance['masks'][0], background)
-            new_instance_bbox = new_instance_bbox + [instance['bboxes'][0][4]] # Add label to the bounding box
+            out = self._paste_single_instance(instance['image'], 
+                                            instance['masks'][0], 
+                                            background, 
+                                            min_visible_pct=self.min_visible_pct)
+            background, new_instance_mask, new_instance_bbox = out
+            new_instance_bbox = new_instance_bbox # Add label to the bounding box
             new_masks.append(new_instance_mask)
             new_bboxes.append(new_instance_bbox)
-        #print(len(new_masks), len(new_bboxes))
-        #print(bboxes)
+        # Collect all bounding boxes and masks
         bboxes.extend(new_bboxes)
         masks.extend(new_masks)
-        #print(len(masks), len(bboxes))
+        labels.extend([instances[i]['labels'] for i in range(len(instances))])
+
+        # Adjust the masks and bounding boxes to make sure they are consistent and that masks do not overlap
         adjusted_masks, adjusted_bboxes = self._adjust_masks_and_bboxes(masks, bboxes)
+        if isinstance(background, Image.Image): 
+            background = np.array(background)
         
-        return {"image": np.array(background), "masks": adjusted_masks, "bboxes": adjusted_bboxes}
+        background = self._blend_masks2background(image, background, adjusted_masks, sigma = 1.0)
+
+        return background, {"masks": adjusted_masks, "boxes": adjusted_bboxes, "labels": labels}
+    
+    def _blend_masks2background(self, original_image, pasted_image, mask, sigma:float):
+        """
+        Blend the pasted image with the background image.
+        """
+        # Ensure mask is a single channel and in the correct format
+        if isinstance(mask, list):
+            mask = np.stack(mask, axis=0)
+        if len(mask.shape) > 2:
+            mask = mask.sum(axis=0)
+
+        # Optionally apply Gaussian blur to the mask for smooth blending
+        mask = gaussian(mask, sigma = sigma, preserve_range=True)
+        
+        # Perform blending
+        mask = mask[..., None] # W x H x 1
+        blended_area = pasted_image * mask + original_image * (1 - mask)
+        blended_area = blended_area.astype(pasted_image.dtype)
+        return blended_area
 
     def _adjust_masks_and_bboxes(self, masks, bboxes):
         # Stack masks into a 3D numpy array
@@ -79,8 +108,8 @@ class InstanceCopyPaste():
         for i in range(len(visible_keypoints_per_mask)):
             if visible_keypoints_per_mask[i] > self.min_visible_keyspoint:
                 adjusted_masks.append(new_masks[i])
-                x, y, width, height = self.extract_bbox(new_masks[i])
-                adjusted_bboxes.append([(x, y, width, height, bboxes[i][4])])
+                x1, y1, x2, y2 = self.extract_bbox(new_masks[i])
+                adjusted_bboxes.append([(x1, y1, x2, y2)])
         
         return adjusted_masks, adjusted_bboxes
     
@@ -95,7 +124,7 @@ class InstanceCopyPaste():
         ymin, ymax = np.where(rows)[0][[0, -1]]
         xmin, xmax = np.where(cols)[0][[0, -1]]
         assert ymax >= ymin and xmax >= xmin
-        return int(xmin), int(ymin), int(xmax)-int(xmin), int(ymax)-int(ymin)
+        return int(xmin), int(ymin), int(xmax), int(ymax)
       
     # TODO: Implement the layering
     #! DOES NOT WORK YET
@@ -122,21 +151,19 @@ class InstanceCopyPaste():
         """
         Crop an image given a bounding box.
         """
-        x, y, width, height = bbox
-        return image[y:y+height, x:x+width]
-
-    # TODO: There is a bug in the pasting of the image
-    # TODO: sometimes it will have a mismatch with the effective mask and so fort
-    def _paste_single_instance(self, image, mask, background):
+        x1, y1, x2, y2 = bbox
+        return image[y1:y2, x1:x2]
+    
+    def _paste_single_instance(self, image, mask, background, min_visible_pct):
         """
-        Paste a segmented part of an image such that at least 25% of it remains within
+        Paste a segmented part of an image such that at least K% of it remains within
         the background image boundaries.
         
         Args:
         image (PIL.Image): Input image of size n by n.
         mask (numpy.array): Segmentation mask, same dimensions as image.
-        bbox (tuple): Bounding box (xmin, ymin, xmax, ymax).
         background (PIL.Image): Background image to paste onto.
+        min_visible_pct (float): Minimum percentage of the image that should remain visible when pasted.
         
         Returns:
         PIL.Image: Modified background image with the pasted segment.
@@ -147,16 +174,16 @@ class InstanceCopyPaste():
             image = Image.fromarray(image)
         if not isinstance(background, Image.Image):
             background = Image.fromarray(background)
+
         # Convert the segmentation mask to a PIL image and extract the region
         mask_image = Image.fromarray((mask * 255).astype(np.uint8))
-        segmented_part = Image.composite(image, Image.new('RGB', image.size), mask_image)
+        segmented_part = Image.composite(image, Image.new('RGB', image.size, (0, 0, 0)), mask_image)
 
         # Calculate the range for the random location
-        # Allowing part of the image to be outside the background
-        min_x = int(-(1-self.min_visible_pct) * image.width)
-        max_x = int(background.width - self.min_visible_pct * image.width)
-        min_y = int(-(1-self.min_visible_pct) * image.height)
-        max_y = int(background.height - self.min_visible_pct * image.height)
+        min_x = int(-(1-min_visible_pct) * image.width)
+        max_x = int(background.width - min_visible_pct * image.width)
+        min_y = int(-(1-min_visible_pct) * image.height)
+        max_y = int(background.height - min_visible_pct * image.height)
 
         random_x = random.randint(min_x, max_x)
         random_y = random.randint(min_y, max_y)
@@ -166,24 +193,23 @@ class InstanceCopyPaste():
 
         # Update the mask and bounding box
         new_mask = np.zeros((background.height, background.width), dtype=np.uint8)
-        #! This is where the bug is (below)
-        # Calculate the effective coordinates considering possible negative indices
-        effective_x = max(random_x, 0)
-        effective_y = max(random_y, 0)
-        effective_width = min(segmented_part.width, background.width - effective_x)
-        effective_height = min(segmented_part.height, background.height - effective_y)
-        #print("New Mask Indices:", effective_y, effective_y + effective_height, effective_x, effective_x + effective_width)
-        #print("Mask Indices:",  max(-random_y, 0),  max(-random_y, 0) + effective_height, max(-random_x, 0), max(-random_x, 0) + effective_width)
 
-        new_mask[effective_y:effective_y + effective_height, effective_x:effective_x + effective_width] = mask[
-            max(-random_y, 0):max(-random_y, 0) + effective_height,
-            max(-random_x, 0):max(-random_x, 0) + effective_width
-        ]
+        # Determine coordinates on the background
+        bx1 = max(random_x, 0)
+        by1 = max(random_y, 0)
+        bx2 = min(random_x + image.width, background.width)
+        by2 = min(random_y + image.height, background.height)
 
-        new_bbox = [
-            effective_x,
-            effective_y,
-            effective_x + effective_width,
-            effective_y + effective_height
-        ]
+        # Determine coordinates on the segmented part
+        sx1 = max(-random_x, 0)
+        sy1 = max(-random_y, 0)
+        sx2 = sx1 + (bx2 - bx1)
+        sy2 = sy1 + (by2 - by1)
+
+        # Update new mask
+        new_mask[by1:by2, bx1:bx2] = mask[sy1:sy2, sx1:sx2]
+
+        new_bbox = (bx1, by1, bx2, by2)
+
         return background, new_mask, new_bbox
+    
