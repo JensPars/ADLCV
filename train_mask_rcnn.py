@@ -27,36 +27,22 @@ val_transform = transforms.Compose([
 transform = A.Compose([
     A.RandomScale(scale_limit=(-0.9, 1), p=1), #LargeScaleJitter from scale of 0.1 to 2
     A.PadIfNeeded(256, 256, border_mode=0), #constant 0 border
-    A.RandomCrop(256, 256),
+    A.Resize(256, 256),
     CopyPaste(blend=True, sigma=1, pct_objects_paste=0.5, p=1),
     AT.ToTensorV2(),
 
 ],bbox_params=A.BboxParams(format="coco"))
 
-train_dataset = CocoDetectionCP(root='data/val2017', annFile='bear_subset_annotations_val.json', transforms=transform)
+#train_dataset = CocoDetectionCP(root='/work3/s194633/train2017', annFile='bear_subset_annotations_train.json', transforms=transform)
 
-#plot the first ten images with masks and bounding boxes
-# print(train_dataset[0][0].max())
-# fig, ax = plt.subplots(2, 5, figsize=(20, 10))
-# for i in range(10):
-#     image, target = train_dataset[i]
-#     image = (image).permute(1, 2, 0).numpy()
-#     ax[i // 5, i % 5].imshow(image)
-#     for box, mask in zip(target['boxes'], target['masks']):
-#         box = box.int().cpu().numpy()
-#         # mask = mask.mul(255).byte().cpu().numpy()
-#         ax[i // 5, i % 5].add_patch(plt.Rectangle((box[0], box[1]), box[2]-box[0], box[3]-box[1], edgecolor='red', fill=False))
-#         ax[i // 5, i % 5].imshow(mask, alpha=0.1)
-# plt.show()
-
-#train_dataset = CocoDetection(root='data/val2017', annFile='bear_subset_annotations_val.json', transform=val_transform)
-#train_dataset = datasets.wrap_dataset_for_transforms_v2(train_dataset, target_keys=["boxes", "labels", "masks"])
-val_dataset = CocoDetection(root='data/val2017', annFile='bear_subset_annotations_val.json', transform=val_transform)
+train_dataset = CocoDetection(root='/work3/s194633/train2017', annFile='bear_subset_annotations_train.json', transform=val_transform)
+train_dataset = datasets.wrap_dataset_for_transforms_v2(train_dataset, target_keys=["boxes", "labels", "masks"])
+val_dataset = CocoDetection(root='/work3/s194633/val2017', annFile='bear_subset_annotations_val.json', transform=val_transform)
 val_dataset = datasets.wrap_dataset_for_transforms_v2(val_dataset, target_keys=["boxes", "labels", "masks"])
 
 # Create data loaders
-train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
-val_loader = DataLoader(val_dataset, batch_size=10, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
 
 # Load pre-trained Mask R-CNN model
 model = maskrcnn_resnet50_fpn(weights=None,num_classes=2)
@@ -65,10 +51,8 @@ model.to(device)
 # Define optimizer and learning rate scheduler
 params = [p for p in model.parameters() if p.requires_grad]
 
-import numpy as np
-
 # Define optimizer
-optimizer = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
+optimizer = torch.optim.AdamW(params, lr=0.005)
 
 # Learning rate scheduler parameters
 initial_lr = 0.005
@@ -91,7 +75,7 @@ def lr_lambda(epoch):
 lr_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
 
-num_epochs = 50
+num_epochs = 30
 best_val_loss = float('inf')
 
 # Training and validation loop
@@ -104,7 +88,7 @@ for epoch in range(num_epochs):
 
         loss_dict = model(images, targets)
         losses = sum(loss for loss in loss_dict.values())
-        print(losses)
+        #print(losses)
 
         optimizer.zero_grad()
         losses.backward()
@@ -122,28 +106,28 @@ for epoch in range(num_epochs):
         for images, targets in val_loader:
             model.train()
             images = [image.to(device) for image in images]
-            targets = [target for target in targets]
+            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
             loss_dict = model(images, targets)
             losses = sum(loss for loss in loss_dict.values())
             val_loss += losses
 
-            model.eval()
-            outputs = model(images)
-            # Calculate mAP using torchmetrics
-            map_metric.update(outputs, targets)
-            map_dict = map_metric.compute()
-            map_val = map_dict['map']
+            # model.eval()
+            # outputs = model(images)
+            # # Calculate mAP using torchmetrics
+            # map_metric.update(outputs, targets)
+            # map_dict = map_metric.compute()
+            # map_val = map_dict['map']
             
     
-    print(f"Epoch [{epoch+1}/{num_epochs}] mAP: {map_val:.4f}")
+    # print(f"Epoch [{epoch+1}/{num_epochs}] mAP: {map_val:.4f}")
     print(f"Epoch [{epoch+1}/{num_epochs}] Validation Loss: {val_loss:.4f}")
 
     # Save best model
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         print("Saving new best model")
-        torch.save(model.state_dict(), 'best_maskrcnn_coco.pth')
+        torch.save(model.state_dict(), '/work3/s194633/plain_best_maskrcnn_bear.pth')
 
 # Optionally, print out best validation loss at the end
 print(f"Best Validation Loss: {best_val_loss:.4f}")
