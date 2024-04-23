@@ -1,5 +1,5 @@
 import torch
-from torchvision.models.detection import maskrcnn_resnet50_fpn
+from torchvision.models.detection import maskrcnn_resnet50_fpn, maskrcnn_resnet50_fpn_v2
 from torchvision.datasets import CocoDetection
 from torchvision.transforms import transforms
 from torch.utils.data import DataLoader
@@ -24,8 +24,8 @@ test_dataset = datasets.wrap_dataset_for_transforms_v2(test_dataset, target_keys
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
 
 # Load the best model
-model = maskrcnn_resnet50_fpn(weights=None, num_classes=2)
-model.load_state_dict(torch.load('/work3/s194633/simple_copy_paste_best_maskrcnn_bear.pth'))
+model = maskrcnn_resnet50_fpn_v2(weights=None, num_classes=2)
+model.load_state_dict(torch.load('/work3/s194633/plain_best_maskrcnn_bear.pth'))
 model.to(device)
 model.eval()
 
