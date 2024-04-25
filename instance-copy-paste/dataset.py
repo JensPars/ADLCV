@@ -24,12 +24,26 @@ def read_and_decompress(file):
     mask = mask.reshape((n, n))
     return mask
 
-class SynData(torch.utils.data.Dataset):
 
-    def __init__(self, img_dir, mask_dir):
-        self.syn_imgs = sorted(glob(os.path.join(img_dir, "*.jpg")))
-        self.syn_lbls = sorted(glob(os.path.join(mask_dir, "*.pkl")))
-        assert len(self.syn_imgs) == len(self.syn_lbls), "Number of image and mask files do not match."
+class SynData(Dataset):
+    """Used in the FID evaluation of generated images."""
+ 
+    def __init__(self, root, cat_dict, fid=False):
+        super().__init__()
+        cat_dirs = sorted(glob(root + "/*"))
+        self.syn_imgs = []
+        self.syn_lbls = []
+        self.cls = []
+        
+        for cat_dir in cat_dirs:
+            cat = cat_dir.split("/")[-1]
+            self.syn_imgs += sorted(glob(cat_dir + "/*.jpg"))
+            self.syn_lbls += sorted(glob(cat_dir + "/*.pkl"))
+            self.cls += [cat_dict[cat]] * len(sorted(glob(cat_dir + "/*.jpg")))
+            
+        assert len(self.syn_imgs) == len(self.syn_lbls)
+        self.fid = fid
+ 
 
     def get_transform(self):
         img_size = random.randint(64,256)
@@ -74,7 +88,7 @@ class SynData(torch.utils.data.Dataset):
         syn_mask = syn_mask.astype(np.uint8)
         #syn_bboxes = self._extract_bbox(syn_mask)
         syn_bbox = self._get_bbox(syn_mask)
-        syn_bbox = syn_bbox + [19] # Add label to the bounding box # TODO: Change this to a more general solution
+        syn_bbox = syn_bbox + [self.cls[idx]] # Add label to the bounding box # TODO: Change this to a more general solution
         output = {
             "image": syn_img,
             "masks": [syn_mask],
