@@ -1,15 +1,15 @@
 #!/bin/sh
 ### General options
 ### –- specify queue --
-#BSUB -q gpua100
+#BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J testjob
+#BSUB -J v100-50
 ### -- ask for number of cores (default: 1) --
-#BSUB -n 4
+#BSUB -n 8
 ### -- Select the resources: 1 gpu in exclusive process mode --
 #BSUB -gpu "num=1:mode=exclusive_process"
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
-#BSUB -W 08:00
+#BSUB -W 16:00
 # request 5GB of system-memory
 #BSUB -R "rusage[mem=12GB]"
 ### -- set the email address --
@@ -29,4 +29,4 @@ source /work3/s194633/venv_1/bin/activate
 # Load the cuda module
 module load cuda/11.6
 
-python train_mask_rcnn.py --copy_paste False --data_fraction 0.025
+python train_mask_rcnn.py --copy_paste False --data_fraction 0.5
