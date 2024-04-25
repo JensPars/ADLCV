@@ -17,7 +17,8 @@ import torch
 from torchvision.models.detection import maskrcnn_resnet50_fpn, maskrcnn_resnet50_fpn_v2
 from torchvision.models.detection import MaskRCNN_ResNet50_FPN_Weights
 from torch.utils.data import Subset
-
+from instance_copy_paste.dataset import SynData, COCO_DETECTION
+from instance_copy_paste.copy_paste import InstanceCopyPaste, InstanceRetriever
 
 def data_subset(dataset,fraction):
     # Calculate half of the length of the dataset
@@ -26,14 +27,18 @@ def data_subset(dataset,fraction):
     indices = range(num_samples)
     return Subset(dataset, indices)
 
+syn_dataset = SynData("../sdxl-turbo", {"car": 2, "bus": 1, "boat": 3})
+instance_retriever = InstanceRetriever(syn_dataset)
+
 
 # Argument parsing
 parser = ArgumentParser(description="Choose the COCO dataset version for training.")
 parser.add_argument("--copy_paste", help="Use COCOCP dataset for training.")
 parser.add_argument("--data_fraction", help="portion of data to use for training", default=1., type=float)
+parser.add_argument("--syn_data", help="Use synthetic data for training")
 args = parser.parse_args()
 
-wandb.init(project = "copy-paste-project", name=f"mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data")
+wandb.init(project = "copy-paste-project", name=f"{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data")
 
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -43,6 +48,21 @@ val_transform = transforms.Compose([
     transforms.ToTensor(),
     #A.Resize(512, 512),
 ])
+
+inst_transform = transform = A.Compose(
+    [
+        A.RandomScale(
+            scale_limit=(-0.9, 1), p=1
+        ),  # LargeScaleJitter from scale of 0.1 to 2
+        A.PadIfNeeded(
+            512, 512, border_mode=0
+        ),  # pads with image in the center, not the top left like the paper
+        A.RandomCrop(512, 512, p=1),
+    ],
+    bbox_params=A.BboxParams(
+        format="coco", min_visibility=0.05, label_fields=["labels"]
+    ),
+)
 
 transform = A.Compose([
     A.RandomScale(scale_limit=(-0.9, 1), p=1), #LargeScaleJitter from scale of 0.1 to 2
@@ -55,8 +75,19 @@ transform = A.Compose([
 if args.copy_paste == "True":
     train_dataset = CocoDetectionCP(root='/work3/s194633/train2017', annFile='car_boat_bus_train.json', transforms=transform)
 else:
-    train_dataset = CocoDetection(root='/work3/s194633/train2017', annFile='car_boat_bus_train.json', transform=val_transform)
+    train_dataset = CocoDetection(root='data/val2017', annFile='car_boat_bus_train.json', transform=val_transform)
     train_dataset = datasets.wrap_dataset_for_transforms_v2(train_dataset, target_keys=["boxes", "labels", "masks"])
+
+if args.syn_data == "True":
+    train_dataset  = COCO_DETECTION(
+    "data/val2017",
+    "car_boat_bus_val.json",
+    categories=["boat", "car", "bus"],
+    transform=transform,
+    instance_copy_paste=InstanceCopyPaste(instance_retriever, "random", 5, 0.5, 20),
+)
+
+
 
 train_dataset = data_subset(train_dataset,args.data_fraction)
 
@@ -64,8 +95,8 @@ val_dataset = CocoDetection(root='/work3/s194633/val2017', annFile='car_boat_bus
 val_dataset = datasets.wrap_dataset_for_transforms_v2(val_dataset, target_keys=["boxes", "labels", "masks"])
 
 # Create data loaders
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
-val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
 
 
 # Load pre-trained Mask R-CNN model
@@ -123,7 +154,7 @@ for epoch in range(num_epochs):
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         print(f"Saving new best model at Epoch {epoch+1}")
-        model_path = f'/work3/s194633/{"copy_paste" if args.copy_paste=="True" else "plain"}_best_maskrcnn_car_boat_bus_train_{str(args.data_fraction)}_data.pth'
+        model_path = f"/work3/s194633/{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"
         torch.save(model.state_dict(), model_path)
 
 print(f"Best Validation Loss: {best_val_loss:.4f}")
@@ -144,7 +175,7 @@ test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=
 
 # Load the best model
 model = maskrcnn_resnet50_fpn_v2(weights=None, num_classes=4)
-model.load_state_dict(torch.load(f'/work3/s194633/{"copy_paste" if args.copy_paste=="True" else "plain"}_best_maskrcnn_car_boat_bus_train_{str(args.data_fraction)}_data.pth'))
+model.load_state_dict(torch.load(f"/work3/s194633/{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"))
 model.to(device)
 model.eval()
 
