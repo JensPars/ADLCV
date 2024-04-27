@@ -11,6 +11,7 @@ from glob import glob
 import pickle
 import zlib
 import albumentations as A
+import albumentations.pytorch as AT
 
 def read_and_decompress(file):
     # Read the compressed mask from the pickle file
@@ -43,7 +44,7 @@ class SynData(Dataset):
             
         assert len(self.syn_imgs) == len(self.syn_lbls)
         self.fid = fid
- 
+
 
     def get_transform(self):
         img_size = random.randint(64,256)
@@ -80,7 +81,7 @@ class SynData(Dataset):
         """
         # Load synthetic image
         syn_img = Image.open(self.syn_imgs[idx]).convert("RGB")
-        syn_img_class = self.syn_imgs[idx].split("/")[-2]
+        syn_img_class = self.cls[idx]
         # TODO: Map the class to the label
         syn_img = np.array(syn_img)
         # Load synthetic mask
@@ -114,23 +115,14 @@ class COCO_DETECTION(Dataset):
         self.instance_copy_paste = instance_copy_paste
         self.min_keypoints_per_image = min_keypoints_per_image
         self.cat_ids = None
-
         # Filter annotations by category IDs if specified
-        if categories:
-            self.cat_ids = self.coco.getCatIds(catNms=categories)
-            img_ids = self.coco.getImgIds(catIds=self.cat_ids)
-        else:
-            img_ids = self.coco.getImgIds()
+        # if categories:
+        #     self.cat_ids = self.coco.getCatIds(catNms=categories)
+        #     img_ids = self.coco.getImgIds(catIds=self.cat_ids)
+        # else:
+        img_ids = self.coco.getImgIds()
 
         self.ids = list(sorted(img_ids))
-        # filter images without detection annotations
-        ids = []
-        for img_id in self.ids:
-            ann_ids = self.coco.getAnnIds(imgIds=img_id, iscrowd=None)
-            anno = self.coco.loadAnns(ann_ids)
-            if has_valid_annotation(anno, min_keypoints_per_image):
-                ids.append(img_id)
-        self.ids = ids
     
     def __len__(self):
         return len(self.ids)
@@ -154,10 +146,10 @@ class COCO_DETECTION(Dataset):
         # Load image
         img = np.array(self._get_coco_image(img_id))
         # Specific instances in the dataset
-        if self.cat_ids:
-            ann_ids = self.coco.getAnnIds(imgIds=img_id, catIds=self.cat_ids, iscrowd=None)
-        else:
-            ann_ids = self.coco.getAnnIds(imgIds=img_id)
+        # if self.cat_ids:
+        #     ann_ids = self.coco.getAnnIds(imgIds=img_id, catIds=self.cat_ids, iscrowd=None)
+        # else:
+        ann_ids = self.coco.getAnnIds(imgIds=img_id)
 
         # Load annotations
         coco_annotation = self.coco.loadAnns(ann_ids)
@@ -178,24 +170,18 @@ class COCO_DETECTION(Dataset):
             "labels": labels
         }
         return output
+
     def post_process(self, img, target):
         if not isinstance(img, torch.Tensor):
             img = torch.from_numpy(img.transpose(2, 0, 1))
-        
-        mapped_labels = []
-        for label in target['labels']:
-            if isinstance(label, str):
-                mapped_labels.append(self.coco.getCatIds(catNms=label))
-            else:
-                mapped_labels.append(label)
             
         target = {
-            "masks": [torch.as_tensor(mask).float() for mask in target["masks"]],
-            "boxes": [torch.as_tensor(box).float() for box in target["boxes"]],
-            "labels": [torch.as_tensor(label).float() for label in mapped_labels]
+            "masks": torch.concat([torch.as_tensor(mask).unsqueeze(0).float() for mask in target["masks"]]),
+            "boxes": torch.as_tensor(target["boxes"]).float(),
+            "labels": torch.as_tensor(target['labels'], dtype = torch.int64)
         }
 
-        return img, target
+        return img.float(), target
 
     def __getitem__(self, idx):
         coco_data = self._get_coco_data(idx)
@@ -213,10 +199,9 @@ class COCO_DETECTION(Dataset):
             img = coco_data["image"]
             target = {
                 "masks": coco_data["masks"],
-                "bboxes": coco_data["bboxes"],
+                "boxes": coco_data["bboxes"],
                 "labels": coco_data["labels"]
             }
-
         img, target = self.post_process(img, target)
         return img, target
 

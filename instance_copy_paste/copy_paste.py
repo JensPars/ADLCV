@@ -53,13 +53,13 @@ class InstanceCopyPaste():
         labels.extend([instances[i]['labels'] for i in range(len(instances))])
 
         # Adjust the masks and bounding boxes to make sure they are consistent and that masks do not overlap
-        adjusted_masks, adjusted_bboxes = self._adjust_masks_and_bboxes(masks, bboxes)
+        adjusted_masks, adjusted_bboxes, adjusted_labels = self._adjust_masks_and_bboxes(masks, bboxes, labels)
         if isinstance(background, Image.Image): 
             background = np.array(background)
-        
-        background = self._blend_masks2background(image, background, adjusted_masks, sigma = 1.0)
+        if labels != []:
+            background = self._blend_masks2background(image, background, adjusted_masks, sigma = 1.0)
 
-        return background, {"masks": adjusted_masks, "boxes": adjusted_bboxes, "labels": labels}
+        return background, {"masks": adjusted_masks, "boxes": adjusted_bboxes, "labels": adjusted_labels}
     
     def _blend_masks2background(self, original_image, pasted_image, mask, sigma:float):
         """
@@ -80,7 +80,7 @@ class InstanceCopyPaste():
         blended_area = blended_area.astype(pasted_image.dtype)
         return blended_area
 
-    def _adjust_masks_and_bboxes(self, masks, bboxes):
+    def _adjust_masks_and_bboxes(self, masks, bboxes, labels):
         # Stack masks into a 3D numpy array
         masks = np.stack(masks, axis=0)
 
@@ -102,16 +102,19 @@ class InstanceCopyPaste():
         # Adjust the bounding boxes and remove masks with too few key points visible
         adjusted_bboxes = []
         adjusted_masks = []
-        assert len(new_masks) == len(bboxes), "Number of masks and bounding boxes do not match."
+        adjusted_labels = []
+        #assert len(new_masks) == len(bboxes), "Number of masks and bounding boxes do not match."
         assert len(new_masks) == len(visible_keypoints_per_mask), "Number of masks and visible keypoints do not match."
         
         for i in range(len(visible_keypoints_per_mask)):
             if visible_keypoints_per_mask[i] > self.min_visible_keyspoint:
-                adjusted_masks.append(new_masks[i])
                 x1, y1, x2, y2 = self.extract_bbox(new_masks[i])
-                adjusted_bboxes.append([(x1, y1, x2, y2)])
+                if (x2-x1 > 0) and (y2-y1 > 0): # validate bounding box
+                    adjusted_masks.append(new_masks[i])
+                    adjusted_bboxes.append([x1, y1, x2, y2])
+                    adjusted_labels.append(labels[i])
         
-        return adjusted_masks, adjusted_bboxes
+        return adjusted_masks, adjusted_bboxes, adjusted_labels
     
     def extract_bbox(self, mask):
         """

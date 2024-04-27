@@ -1,12 +1,13 @@
+import os
 from torchvision.datasets import CocoDetection
 from torchvision import datasets
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 from tqdm import tqdm
-
-
+from dotenv import load_dotenv
 import albumentations.pytorch as AT
 import albumentations as A
+
 import matplotlib.pyplot as plt
 from simple_copy_paste.coco import CocoDetectionCP
 from simple_copy_paste.simple_copy_paste import CopyPaste
@@ -20,6 +21,8 @@ from torch.utils.data import Subset
 from instance_copy_paste.dataset import SynData, COCO_DETECTION
 from instance_copy_paste.copy_paste import InstanceCopyPaste, InstanceRetriever
 
+load_dotenv()
+
 def data_subset(dataset,fraction):
     # Calculate half of the length of the dataset
     num_samples = int(len(dataset)*fraction)
@@ -27,7 +30,7 @@ def data_subset(dataset,fraction):
     indices = range(num_samples)
     return Subset(dataset, indices)
 
-syn_dataset = SynData("../sdxl-turbo", {"car": 2, "bus": 1, "boat": 3})
+syn_dataset = SynData(os.environ.get("SYN_DATA_DIR"), {"car": 2, "bus": 1, "boat": 3})
 instance_retriever = InstanceRetriever(syn_dataset)
 
 
@@ -73,25 +76,37 @@ transform = A.Compose([
 
 ],bbox_params=A.BboxParams(format="coco"))
 if args.copy_paste == "True":
-    train_dataset = CocoDetectionCP(root='/work3/s194633/train2017', annFile='car_boat_bus_train.json', transforms=transform)
+    train_dataset = CocoDetectionCP(root=os.environ.get("COCO_DATA_DIR_TRAIN"), annFile='car_boat_bus_train.json', transforms=transform)
 else:
-    train_dataset = CocoDetection(root='data/val2017', annFile='car_boat_bus_train.json', transform=val_transform)
+    train_dataset = CocoDetection(root=os.environ.get("COCO_DATA_DIR_VAL"), annFile='car_boat_bus_train.json', transform=val_transform)
     train_dataset = datasets.wrap_dataset_for_transforms_v2(train_dataset, target_keys=["boxes", "labels", "masks"])
 
 if args.syn_data == "True":
+    transform = A.Compose(
+    [
+        A.RandomScale(
+            scale_limit=(-0.9, 1), p=1
+        ),  # LargeScaleJitter from scale of 0.1 to 2
+        A.PadIfNeeded(
+            512, 512, border_mode=0
+        ),  # pads with image in the center, not the top left like the paper
+        A.Resize(512, 512, p=1),
+    ],
+    bbox_params=A.BboxParams(
+        format="coco", min_visibility=0.05, label_fields=["labels"]
+        ),
+    )
     train_dataset  = COCO_DETECTION(
-    "data/val2017",
-    "car_boat_bus_val.json",
+    os.environ.get("COCO_DATA_DIR_TRAIN"),
+    "car_boat_bus_train.json",
     categories=["boat", "car", "bus"],
     transform=transform,
-    instance_copy_paste=InstanceCopyPaste(instance_retriever, "random", 5, 0.5, 20),
-)
-
-
+    instance_copy_paste=InstanceCopyPaste(instance_retriever, "random", 8, 0.5, 10),
+    )
 
 train_dataset = data_subset(train_dataset,args.data_fraction)
 
-val_dataset = CocoDetection(root='/work3/s194633/val2017', annFile='car_boat_bus_val.json', transform=val_transform)
+val_dataset = CocoDetection(root=os.environ.get("COCO_DATA_DIR_VAL"), annFile='car_boat_bus_val.json', transform=val_transform)
 val_dataset = datasets.wrap_dataset_for_transforms_v2(val_dataset, target_keys=["boxes", "labels", "masks"])
 
 # Create data loaders
@@ -118,7 +133,6 @@ for epoch in range(num_epochs):
     for images, targets in tqdm(train_loader, desc=f"Train Epoch {epoch+1}", leave=False):
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-
         loss_dict = model(images, targets)
         losses = sum(loss for loss in loss_dict.values())
         
@@ -154,7 +168,7 @@ for epoch in range(num_epochs):
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         print(f"Saving new best model at Epoch {epoch+1}")
-        model_path = f"/work3/s194633/{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"
+        model_path = f"{os.environ.get('SCRATCH_DIR')}/{'syn_data' if args.syn_data == 'True' else ''}-mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"
         torch.save(model.state_dict(), model_path)
 
 print(f"Best Validation Loss: {best_val_loss:.4f}")
@@ -165,7 +179,7 @@ test_transform = transforms.Compose([
 ])
 
 # Load test dataset
-test_dataset = CocoDetection(root='/work3/s194633/val2017', annFile="car_boat_bus_val.json", transform=test_transform)
+test_dataset = CocoDetection(root=os.environ.get("COCO_DATA_DIR_TEST"), annFile="car_boat_bus_val.json", transform=test_transform)
 
 # Wrap dataset
 test_dataset = datasets.wrap_dataset_for_transforms_v2(test_dataset, target_keys=["boxes", "labels", "masks"])
@@ -175,7 +189,7 @@ test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=
 
 # Load the best model
 model = maskrcnn_resnet50_fpn_v2(weights=None, num_classes=4)
-model.load_state_dict(torch.load(f"/work3/s194633/{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"))
+model.load_state_dict(torch.load(f"{os.environ.get('SCRATCH_DIR')}/{'syn_data' if args.syn_data == 'True' else ''}-mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"))
 model.to(device)
 model.eval()
 
