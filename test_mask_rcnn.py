@@ -41,7 +41,7 @@ model.to(device)
 model.eval()
 
 # Initialize metric
-map_metric = MeanAveragePrecision()
+map_metric = MeanAveragePrecision(class_metrics=True)
 
 # Disable gradient computation for testing
 with torch.no_grad():
@@ -61,6 +61,9 @@ map_val = map_dict['map']
 
 # Log Mean Average Precision to W&B
 wandb.log({"Test mAP": map_val})
+
+# log map_dict
+wandb.log(map_dict)
 
 # Print out Mean Average Precision
 print(f"Test mAP: {map_val:.4f}")
