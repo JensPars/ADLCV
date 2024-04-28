@@ -101,7 +101,7 @@ if args.syn_data == "True":
     "car_boat_bus_train.json",
     categories=["boat", "car", "bus"],
     transform=transform,
-    instance_copy_paste=InstanceCopyPaste(instance_retriever, "random", 8, 0.5, 10),
+    instance_copy_paste=InstanceCopyPaste(instance_retriever, "random", 8, 0.5, 0),
     )
 
 train_dataset = data_subset(train_dataset,args.data_fraction)
@@ -179,7 +179,7 @@ test_transform = transforms.Compose([
 ])
 
 # Load test dataset
-test_dataset = CocoDetection(root=os.environ.get("COCO_DATA_DIR_TEST"), annFile="car_boat_bus_val.json", transform=test_transform)
+test_dataset = CocoDetection(root=os.environ.get("COCO_DATA_DIR_VAL"), annFile="car_boat_bus_val.json", transform=test_transform)
 
 # Wrap dataset
 test_dataset = datasets.wrap_dataset_for_transforms_v2(test_dataset, target_keys=["boxes", "labels", "masks"])
