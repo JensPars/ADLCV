@@ -104,9 +104,8 @@ class MaskedData(Dataset):
             objects.append(cropped_masked_img)
 
         masked_images = torch.stack(objects, dim=0) if objects else torch.empty(0)
-        masked_images = masked_images * 255  # ToTensor is
 
-        return masked_images.to(torch.uint8)[0]  # Mu
+        return masked_images  # Mu
 
 
 class FID:
@@ -141,29 +140,54 @@ class FID:
         self._update(self.real_data, real=True)
         return self.fid.compute()
 
-
 if __name__ == "__main__":
-    for i in [500]:#[100, 200, 300, 400, 500, 600, 700, 800, 900, 998]:
-        syndata = SynData(
-            img_dir="data/experiments_cg/7.5/cat",
-            anno_dir="data/experiments_cg/7.5/cat",
+    syndata = SynData(
+            img_dir="data/stable-diffusion-xl-base-1.0/car",
+            anno_dir="data/stable-diffusion-xl-base-1.0/car",
             fid=True,
         )
-        n_batchs = i//16 + 1
-        syndata = DataLoader(syndata, batch_size=16, drop_last=False)
-        root = "/work3/s194649/train2017"
-        anno = "cat_subset_annotations_train.json"
-        transform = T.Compose([T.Resize([512, 512]),T.ToTensor()])
-        realdata = DataLoader(MaskedData(root, anno, transform=transform, categories="cat"), batch_size=16, drop_last=False)
-        fid = FrechetInceptionDistance(feature=2048).to("cuda")
-        
-        for j, (real, syn) in enumerate(zip(realdata, syndata)):
-            syn = (syn*255).to(torch.uint8).to("cuda")
-            real = real.to("cuda")
-            fid.update(real, real=True)
-            fid.update(syn, real=False)
-            if j == n_batchs:
-                break
-            
-        print(f"with n = {i} FID: {fid.compute()}")
+    syndata = DataLoader(syndata, batch_size=16, drop_last=False)
+    root = "/work3/s194649/val2017"
+    anno = "car_boat_bus_val.json"
+    transform = T.Compose([T.Resize([512, 512]),T.ToTensor()])
+    realdata = DataLoader(MaskedData(root, anno, transform=transform, categories="car"), batch_size=16, drop_last=False)
+    fid = FrechetInceptionDistance(feature=2048).to("cuda")
+    #for j, (real, syn) in enumerate(zip(realdata, syndata)):
+#            syn = (syn*255).to(torch.uint8).to("cuda")
+#            real = real.to("cuda")
+#            fid.update(real, real=True)
+#            fid.update(syn, real=False)
+#            if j == n_batchs:
+#                break
+#            
+#        print(f"with n = {i} FID: {fid.compute()}")
+    
+
+
+
+
+#if __name__ == "__main__":
+#    for i in [500]:
+#        syndata = SynData(
+#            img_dir="data/experiments_cg/7.5/cat",
+#            anno_dir="data/experiments_cg/7.5/cat",
+#            fid=True,
+#        )
+#        n_batchs = i//16 + 1
+#        syndata = DataLoader(syndata, batch_size=16, drop_last=False)
+#        root = "/work3/s194649/train2017"
+#        anno = "cat_subset_annotations_train.json"
+#        transform = T.Compose([T.Resize([512, 512]),T.ToTensor()])
+#        realdata = DataLoader(MaskedData(root, anno, transform=transform, categories="cat"), batch_size=16, drop_last=False)
+#        fid = FrechetInceptionDistance(feature=2048).to("cuda")
+#        
+#        for j, (real, syn) in enumerate(zip(realdata, syndata)):
+#            syn = (syn*255).to(torch.uint8).to("cuda")
+#            real = real.to("cuda")
+#            fid.update(real, real=True)
+#            fid.update(syn, real=False)
+#            if j == n_batchs:
+#                break
+#            
+#        print(f"with n = {i} FID: {fid.compute()}")
 

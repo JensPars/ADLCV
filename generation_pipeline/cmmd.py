@@ -149,20 +149,21 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     
     syndata = SynData(
-        img_dir="data/experiments_turbo_4steps",
-        anno_dir="data/experiments_turbo_4steps",
+        img_dir="data/sdxl-turbov2_4steps/car",
+        anno_dir="data/sdxl-turbov2_4steps/car",
         fid=True,
     )
     print(syndata[0].max())
     syndata = DataLoader(syndata, batch_size=16)
-    root = "/work3/s194649/train2017"
-    anno = "cat_subset_annotations_train.json"
+    root = "/work3/s194649/val2017"
+    anno = "car_boat_bus_val.json"
     transform = T.Compose([T.Resize([512, 512]),T.ToTensor()])
-    realdata = DataLoader(MaskedData(root, anno, transform=transform, categories="cat"), batch_size=16, drop_last=True, collate_fn=lambda x: torch.concatenate(x, dim=0))
+    realdata = DataLoader(MaskedData(root, anno, transform=transform, categories="boat"), batch_size=16, drop_last=True, collate_fn=lambda x: torch.concatenate(x, dim=0))
     clip = ClipEmbeddingModel()
     real_embeds = []
     n_real_imgs = 0
     for real_batch in realdata:
+        print(real_batch.mean())
         real_batch = real_batch.permute(0, 2, 3, 1).numpy()
         real_embed = clip.embed(real_batch)
         real_embeds.append(real_embed)
@@ -171,10 +172,15 @@ if __name__ == "__main__":
             break
     
     syn_embeds = []
+    n_syn_imgs = 0
     for syn_batch in syndata:
+        print(syn_batch.mean())
         syn_batch = syn_batch.permute(0, 2, 3, 1).numpy()
         syn_embed = clip.embed(syn_batch)
         syn_embeds.append(syn_embed)
+        n_syn_imgs += syn_embed.shape[0]
+        if n_syn_imgs>=500:
+            break
     
     real_embeds = torch.concat(real_embeds, dim=0)
     print(real_embeds.shape)
