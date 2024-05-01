@@ -35,7 +35,7 @@ instance_retriever = InstanceRetriever(syn_dataset)
 # Argument parsing
 parser = ArgumentParser(description="Choose the COCO dataset version for training.")
 parser.add_argument("--copy_paste", help="Use COCOCP dataset for training.")
-parser.add_argument("--data_fraction", help="portion of data to use for training", default=1., type=float)
+parser.add_argument("--data_fraction", help="portion of data to use for training", default=0.025, type=float)
 parser.add_argument("--syn_data", help="Use synthetic data for training")
 args = parser.parse_args()
 
@@ -74,14 +74,14 @@ transform = A.Compose([
 
 ],bbox_params=A.BboxParams(format="coco"))
 if args.copy_paste == "True":
-    train_dataset = CocoDetectionCP(root='/work3/s194633/train2017', annFile='car_boat_bus_train.json', transforms=transform)
+    train_dataset = CocoDetectionCP(root='/work3/s194649/train2017', annFile='car_boat_bus_train.json', transforms=transform)
 else:
-    train_dataset = CocoDetection(root='data/val2017', annFile='car_boat_bus_train.json', transform=val_transform)
+    train_dataset = CocoDetection(root='/work3/s194649/val2017', annFile='car_boat_bus_train.json', transform=val_transform)
     train_dataset = datasets.wrap_dataset_for_transforms_v2(train_dataset, target_keys=["boxes", "labels", "masks"])
 
 if args.syn_data == "True":
     train_dataset  = COCO_DETECTION(
-    "data/val2017",
+    '/work3/s194649/val2017',
     "car_boat_bus_val.json",
     categories=["boat", "car", "bus"],
     transform=transform,
@@ -92,16 +92,16 @@ if args.syn_data == "True":
 
 train_dataset = data_subset(train_dataset,args.data_fraction)
 
-val_dataset = CocoDetection(root='/work3/s194633/val2017', annFile='car_boat_bus_val.json', transform=val_transform)
+val_dataset = CocoDetection(root='/work3/s194649/val2017', annFile='car_boat_bus_val.json', transform=val_transform)
 val_dataset = datasets.wrap_dataset_for_transforms_v2(val_dataset, target_keys=["boxes", "labels", "masks"])
 
 # Create data loaders
-train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
-val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
 
 
 # Load pre-trained Mask R-CNN model with ImageNet backbone weights
-model = maskrcnn_resnet50_fpn_v2(weights_backbone=ResNet50_Weights.DEFAULT, num_classes=3)
+model = maskrcnn_resnet50_fpn_v2(weights_backbone=ResNet50_Weights.DEFAULT, num_classes=4)
 model.to(device)
 wandb.watch(model, log='all')
 
@@ -155,7 +155,7 @@ for epoch in range(num_epochs):
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         print(f"Saving new best model at Epoch {epoch+1}")
-        model_path = f"/work3/s194633/{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"
+        model_path = f"/work3/s194649/{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"
         torch.save(model.state_dict(), model_path)
 
 print(f"Best Validation Loss: {best_val_loss:.4f}")
@@ -166,7 +166,7 @@ test_transform = transforms.Compose([
 ])
 
 # Load test dataset
-test_dataset = CocoDetection(root='/work3/s194633/val2017', annFile="car_boat_bus_val.json", transform=test_transform)
+test_dataset = CocoDetection(root='/work3/s194649/val2017', annFile="car_boat_bus_val.json", transform=test_transform)
 
 # Wrap dataset
 test_dataset = datasets.wrap_dataset_for_transforms_v2(test_dataset, target_keys=["boxes", "labels", "masks"])
@@ -176,7 +176,7 @@ test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=
 
 # Load the best model
 model = maskrcnn_resnet50_fpn_v2(weights=None, num_classes=4)
-model.load_state_dict(torch.load(f"/work3/s194633/{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"))
+model.load_state_dict(torch.load(f"/work3/s194649/{'syn_data' if args.syn_data == 'True' else ''}mask-rcnn-{'copy-paste' if args.copy_paste=='True' else 'plain'}-{str(args.data_fraction)}-data.pth"))
 model.to(device)
 model.eval()
 
