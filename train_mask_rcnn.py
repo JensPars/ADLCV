@@ -39,10 +39,8 @@ for epoch in range(num_epochs):
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
         #breakpoint()
-        
         loss_dict = model(images, targets)
         losses = sum(loss for loss in loss_dict.values())
-        
         optimizer.zero_grad()
         losses.backward()
         optimizer.step()

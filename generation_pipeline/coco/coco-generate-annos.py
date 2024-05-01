@@ -4,10 +4,10 @@ from tqdm import tqdm
 import json
 import matplotlib.pyplot as plt
 
-classes = {'bear': 903}
+classes = {'bus':0, 'car':0, 'boat':0}
 
 # Load the COCO annotation file
-coco_annotation_file = '/work3/s194649/annotations/instances_val2017.json'
+coco_annotation_file = '/work3/s194649/annotations/instances_train2017.json'
 coco = COCO(coco_annotation_file)
 
 # Create a new dictionary to store the subset annotations
@@ -46,9 +46,9 @@ for image in coco.dataset['images']:
 
 print(len(subset_annotations['images']))
 
-# Save the subset annotations as a JSON file
-output_file = 'bear_subset_annotations_val.json'
+# Save the subset annotations as a nicely formatted JSON file
+output_file = 'car_boat_bus_train.json'
 with open(output_file, 'w') as f:
-    json.dump(subset_annotations, f)
+    json.dump(subset_annotations, f, indent=4)
 
 print(f"Subset annotations saved to {output_file}")

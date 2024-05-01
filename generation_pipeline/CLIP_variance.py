@@ -13,7 +13,9 @@ from torchvision import transforms as T
 from tqdm import tqdm
 from glob import glob
 from autosam import read_and_decompress
-from cmmd import mmd, ClipEmbeddingModel
+#from cmmd import mmd, ClipEmbeddingModel
+from pycocotools import coco
+from generation_pipeline.cmmd import ClipEmbeddingModel
 
 
 class SynData(Dataset):
@@ -104,9 +106,8 @@ class MaskedData(Dataset):
             objects.append(cropped_masked_img)
 
         masked_images = torch.stack(objects, dim=0) if objects else torch.empty(0)
-        masked_images = masked_images * 255  # ToTensor is
 
-        return masked_images.to(torch.uint8)[0]  # Mu
+        return masked_images
 
 
 class FID:
@@ -143,27 +144,34 @@ class FID:
 
 
 if __name__ == "__main__":
-    for i in [500]:#[100, 200, 300, 400, 500, 600, 700, 800, 900, 998]:
-        syndata = SynData(
-            img_dir="data/experiments_cg/7.5/cat",
-            anno_dir="data/experiments_cg/7.5/cat",
-            fid=True,
-        )
-        n_batchs = i//16 + 1
-        syndata = DataLoader(syndata, batch_size=16, drop_last=False)
-        root = "/work3/s194649/train2017"
-        anno = "cat_subset_annotations_train.json"
-        transform = T.Compose([T.Resize([512, 512]),T.ToTensor()])
-        realdata = DataLoader(MaskedData(root, anno, transform=transform, categories="cat"), batch_size=16, drop_last=False)
-        fid = FrechetInceptionDistance(feature=2048).to("cuda")
-        
-        for j, (real, syn) in enumerate(zip(realdata, syndata)):
-            syn = (syn*255).to(torch.uint8).to("cuda")
-            real = real.to("cuda")
-            fid.update(real, real=True)
-            fid.update(syn, real=False)
-            if j == n_batchs:
+    #[100, 200, 300, 400, 500, 600, 700, 800, 900, 998]:
+    root='/work3/s194649/val2017'
+    annFile='/work3/s194649/annotations/instances_val2017.json'
+    transform = T.Compose([T.Resize([256, 256]),T.ToTensor()])
+    coco = coco.COCO(annFile)
+    cats = [coco.cats[id]['name'] for id in coco.cats]
+    from transformers import AutoProcessor, CLIPModel
+    model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    model.eval()
+    processor = AutoProcessor.from_pretrained("openai/clip-vit-base-patch32", do_rescale=False)
+    for cat in cats: 
+        save_dir = "img_embeds/" + cat
+        os.makedirs(save_dir, exist_ok=True)
+        realdata = DataLoader(MaskedData(root, annFile, transform=transform, categories=cat),
+                              batch_size=16,
+                              drop_last=False,
+                              collate_fn=lambda x: np.concatenate(x, axis=0))
+        n_imgs = 0
+        for img in realdata:
+            inputs = processor(images=img, return_tensors="pt")
+            image_features = model.get_image_features(**inputs)
+            n_imgs += img.shape[0]
+            # write to npy
+            np.save(f"{save_dir}/image_features_{n_imgs}.npy", image_features.detach().cpu().numpy())
+            print(n_imgs)
+            if n_imgs > 1000:
                 break
             
-        print(f"with n = {i} FID: {fid.compute()}")
+            
+            
 

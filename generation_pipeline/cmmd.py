@@ -16,7 +16,8 @@
 # limitations under the License.
 
 """Memory-efficient MMD implementation in JAX."""
-from setupHF_cache import *
+if __name__ == "__main__":
+    from setupHF_cache import *
 import torch
 
 # The bandwidth parameter for the Gaussian RBF kernel. See the paper for more
@@ -148,32 +149,35 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     
     syndata = SynData(
-        img_dir="data/experiments_cg/7.5/cat",
-        anno_dir="data/experiments_cg/7.5/cat",
+        img_dir="data/experiments_turbo_4steps",
+        anno_dir="data/experiments_turbo_4steps",
         fid=True,
     )
-    print(syndata[0])
+    print(syndata[0].max())
     syndata = DataLoader(syndata, batch_size=16)
-    
     root = "/work3/s194649/train2017"
-    anno = "coco_subset_annotations.json"
+    anno = "cat_subset_annotations_train.json"
     transform = T.Compose([T.Resize([512, 512]),T.ToTensor()])
-    realdata = DataLoader(MaskedData(root, anno, transform=transform, categories="dog"), batch_size=16, drop_last=True, collate_fn=lambda x: torch.concatenate(x, dim=0))
+    realdata = DataLoader(MaskedData(root, anno, transform=transform, categories="cat"), batch_size=16, drop_last=True, collate_fn=lambda x: torch.concatenate(x, dim=0))
     clip = ClipEmbeddingModel()
     real_embeds = []
+    n_real_imgs = 0
     for real_batch in realdata:
         real_batch = real_batch.permute(0, 2, 3, 1).numpy()
         real_embed = clip.embed(real_batch)
         real_embeds.append(real_embed)
+        n_real_imgs += real_embed.shape[0]
+        if n_real_imgs>=500:
+            break
+    
     syn_embeds = []
     for syn_batch in syndata:
         syn_batch = syn_batch.permute(0, 2, 3, 1).numpy()
         syn_embed = clip.embed(syn_batch)
         syn_embeds.append(syn_embed)
-        
+    
     real_embeds = torch.concat(real_embeds, dim=0)
+    print(real_embeds.shape)
     syn_embeds = torch.concat(syn_embeds, dim=0)
-    #print(mmd(real_embeds,syn_embeds))
-    mmds = []
-    for i in [100, 200, 300, 400, 500, 600, 700, 800, 900, 998]:
-        print(f'with n = {i}, mmd = ', mmd(real_embeds[:i], syn_embeds[:i]))
+    print(syn_embeds.shape)
+    print(f'CLIP-mmd = ', mmd(real_embeds, syn_embeds))

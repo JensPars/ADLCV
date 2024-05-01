@@ -8,7 +8,7 @@ from torchvision.models.detection import maskrcnn_resnet50_fpn_v2
 
 # Set the root directory and annotation file path
 root = "/work3/s194649/train2017"
-anno = "/zhome/ca/9/146686/ADLCV/bear_subset_annotations_train.json"
+anno = "/zhome/ca/9/146686/ADLCV/bear_subset_annotations_val.json"
 
 dataset = CocoDetection(root=root, annFile=anno)
 

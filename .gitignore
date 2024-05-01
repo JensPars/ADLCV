@@ -128,3 +128,837 @@ generation_pipeline/fig/7.5/giraffe/mask_1626704799.pkl
 generation_pipeline/fig/7.5/giraffe/mask_1986331832.pkl
 generation_pipeline/fig/7.5/giraffe/mask_3679661693.pkl
 fig/.DS_Store
+dendos/dendos.png
+dendos/dendosairplane.png
+dendos/dendosapple.png
+dendos/dendosbackpack.png
+dendos/dendosbanana.png
+dendos/dendosbaseball bat.png
+dendos/dendosbaseball glove.png
+dendos/dendosbear.png
+dendos/dendosbed.png
+dendos/dendosbench.png
+dendos/dendosbicycle.png
+dendos/dendosbird.png
+dendos/dendosboat.png
+dendos/dendosbook.png
+dendos/dendosbottle.png
+dendos/dendosbowl.png
+dendos/dendosbroccoli.png
+dendos/dendosbus.png
+dendos/dendoscake.png
+dendos/dendoscar.png
+dendos/dendoscarrot.png
+dendos/dendoscat.png
+dendos/dendoscell phone.png
+dendos/dendoschair.png
+dendos/dendosclock.png
+dendos/dendoscouch.png
+dendos/dendoscow.png
+dendos/dendoscup.png
+dendos/dendosdining table.png
+dendos/dendosdog.png
+dendos/dendosdonut.png
+dendos/dendoselephant.png
+dendos/dendosfire hydrant.png
+dendos/dendosfork.png
+dendos/dendosfrisbee.png
+dendos/dendosgiraffe.png
+dendos/dendoshair drier.png
+dendos/dendoshandbag.png
+dendos/dendoshorse.png
+dendos/dendoskeyboard.png
+dendos/dendoskite.png
+dendos/dendosknife.png
+dendos/dendoslaptop.png
+dendos/dendosmicrowave.png
+dendos/dendosmotorcycle.png
+dendos/dendosmouse.png
+dendos/dendosorange.png
+dendos/dendosoven.png
+dendos/dendosparking meter.png
+dendos/dendosperson.png
+dendos/dendospizza.png
+dendos/dendospotted plant.png
+dendos/dendosrefrigerator.png
+dendos/dendosremote.png
+dendos/dendossandwich.png
+dendos/dendosscissors.png
+dendos/dendossheep.png
+dendos/dendossink.png
+dendos/dendosskateboard.png
+dendos/dendosskis.png
+dendos/dendossnowboard.png
+dendos/dendosspoon.png
+dendos/dendossports ball.png
+dendos/dendosstop sign.png
+dendos/dendossuitcase.png
+dendos/dendossurfboard.png
+dendos/dendostennis racket.png
+dendos/dendostie.png
+dendos/dendostoaster.png
+dendos/dendostoilet.png
+dendos/dendostoothbrush.png
+dendos/dendostraffic light.png
+dendos/dendostrain.png
+dendos/dendostruck.png
+dendos/dendostv.png
+dendos/dendosumbrella.png
+dendos/dendosvase.png
+dendos/dendoswine glass.png
+dendos/dendoszebra.png
+img_embeds/airplane/image_features_21.npy
+img_embeds/airplane/image_features_44.npy
+img_embeds/airplane/image_features_72.npy
+img_embeds/airplane/image_features_92.npy
+img_embeds/airplane/image_features_117.npy
+img_embeds/airplane/image_features_142.npy
+img_embeds/airplane/image_features_143.npy
+img_embeds/apple/image_features_41.npy
+img_embeds/apple/image_features_74.npy
+img_embeds/apple/image_features_145.npy
+img_embeds/apple/image_features_188.npy
+img_embeds/apple/image_features_239.npy
+img_embeds/backpack/image_features_30.npy
+img_embeds/backpack/image_features_46.npy
+img_embeds/backpack/image_features_82.npy
+img_embeds/backpack/image_features_110.npy
+img_embeds/backpack/image_features_144.npy
+img_embeds/backpack/image_features_167.npy
+img_embeds/backpack/image_features_189.npy
+img_embeds/backpack/image_features_213.npy
+img_embeds/backpack/image_features_247.npy
+img_embeds/backpack/image_features_272.npy
+img_embeds/backpack/image_features_293.npy
+img_embeds/backpack/image_features_309.npy
+img_embeds/backpack/image_features_331.npy
+img_embeds/backpack/image_features_364.npy
+img_embeds/backpack/image_features_371.npy
+img_embeds/banana/image_features_47.npy
+img_embeds/banana/image_features_108.npy
+img_embeds/banana/image_features_146.npy
+img_embeds/banana/image_features_204.npy
+img_embeds/banana/image_features_277.npy
+img_embeds/banana/image_features_340.npy
+img_embeds/banana/image_features_379.npy
+img_embeds/baseball bat/image_features_29.npy
+img_embeds/baseball bat/image_features_57.npy
+img_embeds/baseball bat/image_features_84.npy
+img_embeds/baseball bat/image_features_100.npy
+img_embeds/baseball bat/image_features_128.npy
+img_embeds/baseball bat/image_features_145.npy
+img_embeds/baseball bat/image_features_146.npy
+img_embeds/baseball glove/image_features_19.npy
+img_embeds/baseball glove/image_features_46.npy
+img_embeds/baseball glove/image_features_75.npy
+img_embeds/baseball glove/image_features_95.npy
+img_embeds/baseball glove/image_features_120.npy
+img_embeds/baseball glove/image_features_144.npy
+img_embeds/baseball glove/image_features_148.npy
+img_embeds/bear/image_features_26.npy
+img_embeds/bear/image_features_48.npy
+img_embeds/bear/image_features_70.npy
+img_embeds/bear/image_features_71.npy
+img_embeds/bed/image_features_17.npy
+img_embeds/bed/image_features_35.npy
+img_embeds/bed/image_features_51.npy
+img_embeds/bed/image_features_68.npy
+img_embeds/bed/image_features_85.npy
+img_embeds/bed/image_features_103.npy
+img_embeds/bed/image_features_121.npy
+img_embeds/bed/image_features_139.npy
+img_embeds/bed/image_features_158.npy
+img_embeds/bed/image_features_163.npy
+img_embeds/bench/image_features_35.npy
+img_embeds/bench/image_features_67.npy
+img_embeds/bench/image_features_89.npy
+img_embeds/bench/image_features_115.npy
+img_embeds/bench/image_features_144.npy
+img_embeds/bench/image_features_194.npy
+img_embeds/bench/image_features_226.npy
+img_embeds/bench/image_features_249.npy
+img_embeds/bench/image_features_270.npy
+img_embeds/bench/image_features_291.npy
+img_embeds/bench/image_features_325.npy
+img_embeds/bench/image_features_352.npy
+img_embeds/bench/image_features_372.npy
+img_embeds/bench/image_features_389.npy
+img_embeds/bench/image_features_413.npy
+img_embeds/bicycle/image_features_39.npy
+img_embeds/bicycle/image_features_77.npy
+img_embeds/bicycle/image_features_98.npy
+img_embeds/bicycle/image_features_127.npy
+img_embeds/bicycle/image_features_169.npy
+img_embeds/bicycle/image_features_199.npy
+img_embeds/bicycle/image_features_236.npy
+img_embeds/bicycle/image_features_262.npy
+img_embeds/bicycle/image_features_300.npy
+img_embeds/bicycle/image_features_316.npy
+img_embeds/bird/image_features_77.npy
+img_embeds/bird/image_features_123.npy
+img_embeds/bird/image_features_208.npy
+img_embeds/bird/image_features_241.npy
+img_embeds/bird/image_features_301.npy
+img_embeds/bird/image_features_352.npy
+img_embeds/bird/image_features_411.npy
+img_embeds/bird/image_features_440.npy
+img_embeds/boat/image_features_76.npy
+img_embeds/boat/image_features_131.npy
+img_embeds/boat/image_features_189.npy
+img_embeds/boat/image_features_242.npy
+img_embeds/boat/image_features_282.npy
+img_embeds/boat/image_features_332.npy
+img_embeds/boat/image_features_397.npy
+img_embeds/boat/image_features_430.npy
+img_embeds/book/image_features_102.npy
+img_embeds/book/image_features_163.npy
+img_embeds/book/image_features_250.npy
+img_embeds/book/image_features_310.npy
+img_embeds/book/image_features_388.npy
+img_embeds/book/image_features_470.npy
+img_embeds/book/image_features_537.npy
+img_embeds/book/image_features_637.npy
+img_embeds/book/image_features_703.npy
+img_embeds/book/image_features_813.npy
+img_embeds/book/image_features_881.npy
+img_embeds/book/image_features_974.npy
+img_embeds/book/image_features_1069.npy
+img_embeds/bottle/image_features_36.npy
+img_embeds/bottle/image_features_94.npy
+img_embeds/bottle/image_features_144.npy
+img_embeds/bottle/image_features_169.npy
+img_embeds/bottle/image_features_239.npy
+img_embeds/bottle/image_features_292.npy
+img_embeds/bottle/image_features_331.npy
+img_embeds/bottle/image_features_387.npy
+img_embeds/bottle/image_features_463.npy
+img_embeds/bottle/image_features_508.npy
+img_embeds/bottle/image_features_546.npy
+img_embeds/bottle/image_features_595.npy
+img_embeds/bottle/image_features_617.npy
+img_embeds/bottle/image_features_653.npy
+img_embeds/bottle/image_features_704.npy
+img_embeds/bottle/image_features_728.npy
+img_embeds/bottle/image_features_767.npy
+img_embeds/bottle/image_features_802.npy
+img_embeds/bottle/image_features_852.npy
+img_embeds/bottle/image_features_901.npy
+img_embeds/bottle/image_features_943.npy
+img_embeds/bottle/image_features_972.npy
+img_embeds/bottle/image_features_1005.npy
+img_embeds/bowl/image_features_35.npy
+img_embeds/bowl/image_features_58.npy
+img_embeds/bowl/image_features_97.npy
+img_embeds/bowl/image_features_122.npy
+img_embeds/bowl/image_features_144.npy
+img_embeds/bowl/image_features_168.npy
+img_embeds/bowl/image_features_206.npy
+img_embeds/bowl/image_features_236.npy
+img_embeds/bowl/image_features_275.npy
+img_embeds/bowl/image_features_328.npy
+img_embeds/bowl/image_features_357.npy
+img_embeds/bowl/image_features_382.npy
+img_embeds/bowl/image_features_421.npy
+img_embeds/bowl/image_features_449.npy
+img_embeds/bowl/image_features_485.npy
+img_embeds/bowl/image_features_513.npy
+img_embeds/bowl/image_features_540.npy
+img_embeds/bowl/image_features_573.npy
+img_embeds/bowl/image_features_598.npy
+img_embeds/bowl/image_features_626.npy
+img_embeds/broccoli/image_features_75.npy
+img_embeds/broccoli/image_features_159.npy
+img_embeds/broccoli/image_features_219.npy
+img_embeds/broccoli/image_features_286.npy
+img_embeds/broccoli/image_features_316.npy
+img_embeds/bus/image_features_33.npy
+img_embeds/bus/image_features_57.npy
+img_embeds/bus/image_features_78.npy
+img_embeds/bus/image_features_100.npy
+img_embeds/bus/image_features_136.npy
+img_embeds/bus/image_features_159.npy
+img_embeds/bus/image_features_182.npy
+img_embeds/bus/image_features_200.npy
+img_embeds/bus/image_features_222.npy
+img_embeds/bus/image_features_244.npy
+img_embeds/bus/image_features_267.npy
+img_embeds/bus/image_features_285.npy
+img_embeds/cake/image_features_20.npy
+img_embeds/cake/image_features_50.npy
+img_embeds/cake/image_features_78.npy
+img_embeds/cake/image_features_128.npy
+img_embeds/cake/image_features_193.npy
+img_embeds/cake/image_features_226.npy
+img_embeds/cake/image_features_298.npy
+img_embeds/cake/image_features_316.npy
+img_embeds/car/image_features_43.npy
+img_embeds/car/image_features_81.npy
+img_embeds/car/image_features_159.npy
+img_embeds/car/image_features_207.npy
+img_embeds/car/image_features_288.npy
+img_embeds/car/image_features_337.npy
+img_embeds/car/image_features_417.npy
+img_embeds/car/image_features_458.npy
+img_embeds/car/image_features_500.npy
+img_embeds/car/image_features_576.npy
+img_embeds/car/image_features_636.npy
+img_embeds/car/image_features_691.npy
+img_embeds/car/image_features_759.npy
+img_embeds/car/image_features_805.npy
+img_embeds/car/image_features_871.npy
+img_embeds/car/image_features_914.npy
+img_embeds/car/image_features_965.npy
+img_embeds/car/image_features_1019.npy
+img_embeds/carrot/image_features_17.npy
+img_embeds/cat/image_features_18.npy
+img_embeds/cat/image_features_36.npy
+img_embeds/cat/image_features_53.npy
+img_embeds/cat/image_features_69.npy
+img_embeds/cat/image_features_86.npy
+img_embeds/cat/image_features_102.npy
+img_embeds/cat/image_features_118.npy
+img_embeds/cat/image_features_137.npy
+img_embeds/cat/image_features_158.npy
+img_embeds/cat/image_features_175.npy
+img_embeds/cat/image_features_193.npy
+img_embeds/cat/image_features_202.npy
+img_embeds/cell phone/image_features_20.npy
+img_embeds/cell phone/image_features_39.npy
+img_embeds/cell phone/image_features_63.npy
+img_embeds/cell phone/image_features_83.npy
+img_embeds/cell phone/image_features_101.npy
+img_embeds/cell phone/image_features_119.npy
+img_embeds/cell phone/image_features_138.npy
+img_embeds/cell phone/image_features_160.npy
+img_embeds/cell phone/image_features_177.npy
+img_embeds/cell phone/image_features_202.npy
+img_embeds/cell phone/image_features_218.npy
+img_embeds/cell phone/image_features_234.npy
+img_embeds/cell phone/image_features_255.npy
+img_embeds/cell phone/image_features_262.npy
+img_embeds/chair/image_features_47.npy
+img_embeds/chair/image_features_94.npy
+img_embeds/chair/image_features_152.npy
+img_embeds/chair/image_features_184.npy
+img_embeds/chair/image_features_254.npy
+img_embeds/chair/image_features_302.npy
+img_embeds/chair/image_features_357.npy
+img_embeds/chair/image_features_397.npy
+img_embeds/chair/image_features_428.npy
+img_embeds/chair/image_features_468.npy
+img_embeds/chair/image_features_495.npy
+img_embeds/chair/image_features_538.npy
+img_embeds/chair/image_features_592.npy
+img_embeds/chair/image_features_631.npy
+img_embeds/chair/image_features_693.npy
+img_embeds/chair/image_features_745.npy
+img_embeds/chair/image_features_819.npy
+img_embeds/chair/image_features_849.npy
+img_embeds/chair/image_features_909.npy
+img_embeds/chair/image_features_950.npy
+img_embeds/chair/image_features_998.npy
+img_embeds/chair/image_features_1059.npy
+img_embeds/clock/image_features_20.npy
+img_embeds/clock/image_features_39.npy
+img_embeds/clock/image_features_60.npy
+img_embeds/clock/image_features_83.npy
+img_embeds/clock/image_features_101.npy
+img_embeds/clock/image_features_126.npy
+img_embeds/clock/image_features_150.npy
+img_embeds/clock/image_features_167.npy
+img_embeds/clock/image_features_185.npy
+img_embeds/clock/image_features_205.npy
+img_embeds/clock/image_features_227.npy
+img_embeds/clock/image_features_252.npy
+img_embeds/clock/image_features_267.npy
+img_embeds/couch/image_features_18.npy
+img_embeds/couch/image_features_38.npy
+img_embeds/couch/image_features_61.npy
+img_embeds/couch/image_features_83.npy
+img_embeds/couch/image_features_107.npy
+img_embeds/couch/image_features_129.npy
+img_embeds/couch/image_features_153.npy
+img_embeds/couch/image_features_172.npy
+img_embeds/couch/image_features_195.npy
+img_embeds/couch/image_features_214.npy
+img_embeds/couch/image_features_234.npy
+img_embeds/couch/image_features_254.npy
+img_embeds/couch/image_features_261.npy
+img_embeds/cow/image_features_56.npy
+img_embeds/cow/image_features_124.npy
+img_embeds/cow/image_features_199.npy
+img_embeds/cow/image_features_296.npy
+img_embeds/cow/image_features_348.npy
+img_embeds/cow/image_features_380.npy
+img_embeds/cup/image_features_37.npy
+img_embeds/cup/image_features_85.npy
+img_embeds/cup/image_features_121.npy
+img_embeds/cup/image_features_165.npy
+img_embeds/cup/image_features_187.npy
+img_embeds/cup/image_features_228.npy
+img_embeds/cup/image_features_260.npy
+img_embeds/cup/image_features_297.npy
+img_embeds/cup/image_features_331.npy
+img_embeds/cup/image_features_365.npy
+img_embeds/cup/image_features_391.npy
+img_embeds/cup/image_features_432.npy
+img_embeds/cup/image_features_466.npy
+img_embeds/cup/image_features_509.npy
+img_embeds/cup/image_features_548.npy
+img_embeds/cup/image_features_588.npy
+img_embeds/cup/image_features_617.npy
+img_embeds/cup/image_features_658.npy
+img_embeds/cup/image_features_682.npy
+img_embeds/cup/image_features_713.npy
+img_embeds/cup/image_features_770.npy
+img_embeds/cup/image_features_799.npy
+img_embeds/cup/image_features_845.npy
+img_embeds/cup/image_features_863.npy
+img_embeds/cup/image_features_899.npy
+img_embeds/dining table/image_features_18.npy
+img_embeds/dining table/image_features_38.npy
+img_embeds/dining table/image_features_76.npy
+img_embeds/dining table/image_features_107.npy
+img_embeds/dining table/image_features_124.npy
+img_embeds/dining table/image_features_146.npy
+img_embeds/dining table/image_features_167.npy
+img_embeds/dining table/image_features_187.npy
+img_embeds/dining table/image_features_209.npy
+img_embeds/dining table/image_features_226.npy
+img_embeds/dining table/image_features_244.npy
+img_embeds/dining table/image_features_265.npy
+img_embeds/dining table/image_features_283.npy
+img_embeds/dining table/image_features_302.npy
+img_embeds/dining table/image_features_321.npy
+img_embeds/dining table/image_features_338.npy
+img_embeds/dining table/image_features_359.npy
+img_embeds/dining table/image_features_380.npy
+img_embeds/dining table/image_features_401.npy
+img_embeds/dining table/image_features_420.npy
+img_embeds/dining table/image_features_443.npy
+img_embeds/dining table/image_features_479.npy
+img_embeds/dining table/image_features_496.npy
+img_embeds/dining table/image_features_537.npy
+img_embeds/dining table/image_features_556.npy
+img_embeds/dining table/image_features_581.npy
+img_embeds/dining table/image_features_608.npy
+img_embeds/dining table/image_features_626.npy
+img_embeds/dining table/image_features_646.npy
+img_embeds/dining table/image_features_667.npy
+img_embeds/dining table/image_features_689.npy
+img_embeds/dining table/image_features_697.npy
+img_embeds/dog/image_features_18.npy
+img_embeds/dog/image_features_42.npy
+img_embeds/dog/image_features_61.npy
+img_embeds/dog/image_features_81.npy
+img_embeds/dog/image_features_102.npy
+img_embeds/dog/image_features_122.npy
+img_embeds/dog/image_features_140.npy
+img_embeds/dog/image_features_160.npy
+img_embeds/dog/image_features_180.npy
+img_embeds/dog/image_features_197.npy
+img_embeds/dog/image_features_217.npy
+img_embeds/dog/image_features_218.npy
+img_embeds/donut/image_features_75.npy
+img_embeds/donut/image_features_189.npy
+img_embeds/donut/image_features_274.npy
+img_embeds/donut/image_features_338.npy
+img_embeds/elephant/image_features_36.npy
+img_embeds/elephant/image_features_73.npy
+img_embeds/elephant/image_features_128.npy
+img_embeds/elephant/image_features_179.npy
+img_embeds/elephant/image_features_234.npy
+img_embeds/elephant/image_features_255.npy
+img_embeds/fire hydrant/image_features_19.npy
+img_embeds/fire hydrant/image_features_37.npy
+img_embeds/fire hydrant/image_features_53.npy
+img_embeds/fire hydrant/image_features_78.npy
+img_embeds/fire hydrant/image_features_95.npy
+img_embeds/fire hydrant/image_features_101.npy
+img_embeds/fork/image_features_26.npy
+img_embeds/fork/image_features_46.npy
+img_embeds/fork/image_features_70.npy
+img_embeds/fork/image_features_90.npy
+img_embeds/fork/image_features_113.npy
+img_embeds/fork/image_features_131.npy
+img_embeds/fork/image_features_155.npy
+img_embeds/fork/image_features_176.npy
+img_embeds/fork/image_features_200.npy
+img_embeds/fork/image_features_215.npy
+img_embeds/frisbee/image_features_23.npy
+img_embeds/frisbee/image_features_44.npy
+img_embeds/frisbee/image_features_67.npy
+img_embeds/frisbee/image_features_85.npy
+img_embeds/frisbee/image_features_111.npy
+img_embeds/frisbee/image_features_115.npy
+img_embeds/giraffe/image_features_39.npy
+img_embeds/giraffe/image_features_74.npy
+img_embeds/giraffe/image_features_103.npy
+img_embeds/giraffe/image_features_148.npy
+img_embeds/giraffe/image_features_174.npy
+img_embeds/giraffe/image_features_217.npy
+img_embeds/giraffe/image_features_232.npy
+img_embeds/hair drier/image_features_11.npy
+img_embeds/handbag/image_features_35.npy
+img_embeds/handbag/image_features_61.npy
+img_embeds/handbag/image_features_93.npy
+img_embeds/handbag/image_features_129.npy
+img_embeds/handbag/image_features_159.npy
+img_embeds/handbag/image_features_193.npy
+img_embeds/handbag/image_features_222.npy
+img_embeds/handbag/image_features_249.npy
+img_embeds/handbag/image_features_284.npy
+img_embeds/handbag/image_features_311.npy
+img_embeds/handbag/image_features_339.npy
+img_embeds/handbag/image_features_375.npy
+img_embeds/handbag/image_features_404.npy
+img_embeds/handbag/image_features_426.npy
+img_embeds/handbag/image_features_448.npy
+img_embeds/handbag/image_features_481.npy
+img_embeds/handbag/image_features_508.npy
+img_embeds/handbag/image_features_535.npy
+img_embeds/handbag/image_features_540.npy
+img_embeds/horse/image_features_27.npy
+img_embeds/horse/image_features_56.npy
+img_embeds/horse/image_features_96.npy
+img_embeds/horse/image_features_140.npy
+img_embeds/horse/image_features_174.npy
+img_embeds/horse/image_features_200.npy
+img_embeds/horse/image_features_243.npy
+img_embeds/horse/image_features_273.npy
+img_embeds/keyboard/image_features_23.npy
+img_embeds/keyboard/image_features_48.npy
+img_embeds/keyboard/image_features_70.npy
+img_embeds/keyboard/image_features_92.npy
+img_embeds/keyboard/image_features_118.npy
+img_embeds/keyboard/image_features_138.npy
+img_embeds/keyboard/image_features_153.npy
+img_embeds/kite/image_features_45.npy
+img_embeds/kite/image_features_106.npy
+img_embeds/kite/image_features_178.npy
+img_embeds/kite/image_features_237.npy
+img_embeds/kite/image_features_289.npy
+img_embeds/kite/image_features_336.npy
+img_embeds/knife/image_features_25.npy
+img_embeds/knife/image_features_53.npy
+img_embeds/knife/image_features_75.npy
+img_embeds/knife/image_features_109.npy
+img_embeds/knife/image_features_138.npy
+img_embeds/knife/image_features_165.npy
+img_embeds/knife/image_features_207.npy
+img_embeds/knife/image_features_227.npy
+img_embeds/knife/image_features_252.npy
+img_embeds/knife/image_features_295.npy
+img_embeds/knife/image_features_319.npy
+img_embeds/knife/image_features_326.npy
+img_embeds/laptop/image_features_26.npy
+img_embeds/laptop/image_features_43.npy
+img_embeds/laptop/image_features_61.npy
+img_embeds/laptop/image_features_77.npy
+img_embeds/laptop/image_features_94.npy
+img_embeds/laptop/image_features_116.npy
+img_embeds/laptop/image_features_140.npy
+img_embeds/laptop/image_features_157.npy
+img_embeds/laptop/image_features_183.npy
+img_embeds/laptop/image_features_201.npy
+img_embeds/laptop/image_features_223.npy
+img_embeds/laptop/image_features_231.npy
+img_embeds/microwave/image_features_16.npy
+img_embeds/microwave/image_features_32.npy
+img_embeds/microwave/image_features_49.npy
+img_embeds/microwave/image_features_55.npy
+img_embeds/motorcycle/image_features_46.npy
+img_embeds/motorcycle/image_features_73.npy
+img_embeds/motorcycle/image_features_110.npy
+img_embeds/motorcycle/image_features_142.npy
+img_embeds/motorcycle/image_features_198.npy
+img_embeds/motorcycle/image_features_236.npy
+img_embeds/motorcycle/image_features_259.npy
+img_embeds/motorcycle/image_features_282.npy
+img_embeds/motorcycle/image_features_321.npy
+img_embeds/motorcycle/image_features_371.npy
+img_embeds/mouse/image_features_20.npy
+img_embeds/mouse/image_features_41.npy
+img_embeds/mouse/image_features_59.npy
+img_embeds/mouse/image_features_81.npy
+img_embeds/mouse/image_features_98.npy
+img_embeds/mouse/image_features_106.npy
+img_embeds/orange/image_features_49.npy
+img_embeds/orange/image_features_89.npy
+img_embeds/orange/image_features_157.npy
+img_embeds/orange/image_features_215.npy
+img_embeds/orange/image_features_272.npy
+img_embeds/orange/image_features_287.npy
+img_embeds/oven/image_features_20.npy
+img_embeds/oven/image_features_41.npy
+img_embeds/oven/image_features_58.npy
+img_embeds/oven/image_features_80.npy
+img_embeds/oven/image_features_99.npy
+img_embeds/oven/image_features_119.npy
+img_embeds/oven/image_features_139.npy
+img_embeds/oven/image_features_143.npy
+img_embeds/parking meter/image_features_29.npy
+img_embeds/parking meter/image_features_54.npy
+img_embeds/parking meter/image_features_60.npy
+img_embeds/person/image_features_78.npy
+img_embeds/person/image_features_162.npy
+img_embeds/person/image_features_246.npy
+img_embeds/person/image_features_304.npy
+img_embeds/person/image_features_380.npy
+img_embeds/person/image_features_446.npy
+img_embeds/person/image_features_519.npy
+img_embeds/person/image_features_566.npy
+img_embeds/person/image_features_624.npy
+img_embeds/person/image_features_687.npy
+img_embeds/person/image_features_734.npy
+img_embeds/person/image_features_800.npy
+img_embeds/person/image_features_868.npy
+img_embeds/person/image_features_917.npy
+img_embeds/person/image_features_964.npy
+img_embeds/person/image_features_1014.npy
+img_embeds/pizza/image_features_25.npy
+img_embeds/pizza/image_features_71.npy
+img_embeds/pizza/image_features_102.npy
+img_embeds/pizza/image_features_132.npy
+img_embeds/pizza/image_features_177.npy
+img_embeds/pizza/image_features_195.npy
+img_embeds/pizza/image_features_223.npy
+img_embeds/pizza/image_features_245.npy
+img_embeds/pizza/image_features_272.npy
+img_embeds/pizza/image_features_285.npy
+img_embeds/potted plant/image_features_40.npy
+img_embeds/potted plant/image_features_70.npy
+img_embeds/potted plant/image_features_103.npy
+img_embeds/potted plant/image_features_126.npy
+img_embeds/potted plant/image_features_158.npy
+img_embeds/potted plant/image_features_183.npy
+img_embeds/potted plant/image_features_223.npy
+img_embeds/potted plant/image_features_259.npy
+img_embeds/potted plant/image_features_292.npy
+img_embeds/potted plant/image_features_328.npy
+img_embeds/potted plant/image_features_343.npy
+img_embeds/refrigerator/image_features_16.npy
+img_embeds/refrigerator/image_features_34.npy
+img_embeds/refrigerator/image_features_50.npy
+img_embeds/refrigerator/image_features_71.npy
+img_embeds/refrigerator/image_features_103.npy
+img_embeds/refrigerator/image_features_121.npy
+img_embeds/refrigerator/image_features_126.npy
+img_embeds/remote/image_features_28.npy
+img_embeds/remote/image_features_60.npy
+img_embeds/remote/image_features_96.npy
+img_embeds/remote/image_features_121.npy
+img_embeds/remote/image_features_154.npy
+img_embeds/remote/image_features_184.npy
+img_embeds/remote/image_features_224.npy
+img_embeds/remote/image_features_256.npy
+img_embeds/remote/image_features_282.npy
+img_embeds/remote/image_features_283.npy
+img_embeds/sandwich/image_features_29.npy
+img_embeds/sandwich/image_features_52.npy
+img_embeds/sandwich/image_features_80.npy
+img_embeds/sandwich/image_features_111.npy
+img_embeds/sandwich/image_features_151.npy
+img_embeds/sandwich/image_features_175.npy
+img_embeds/sandwich/image_features_177.npy
+img_embeds/scissors/image_features_21.npy
+img_embeds/scissors/image_features_36.npy
+img_embeds/sheep/image_features_66.npy
+img_embeds/sheep/image_features_150.npy
+img_embeds/sheep/image_features_264.npy
+img_embeds/sheep/image_features_360.npy
+img_embeds/sheep/image_features_361.npy
+img_embeds/sink/image_features_20.npy
+img_embeds/sink/image_features_41.npy
+img_embeds/sink/image_features_61.npy
+img_embeds/sink/image_features_81.npy
+img_embeds/sink/image_features_99.npy
+img_embeds/sink/image_features_116.npy
+img_embeds/sink/image_features_132.npy
+img_embeds/sink/image_features_151.npy
+img_embeds/sink/image_features_169.npy
+img_embeds/sink/image_features_190.npy
+img_embeds/sink/image_features_209.npy
+img_embeds/sink/image_features_225.npy
+img_embeds/skateboard/image_features_20.npy
+img_embeds/skateboard/image_features_48.npy
+img_embeds/skateboard/image_features_71.npy
+img_embeds/skateboard/image_features_92.npy
+img_embeds/skateboard/image_features_110.npy
+img_embeds/skateboard/image_features_130.npy
+img_embeds/skateboard/image_features_150.npy
+img_embeds/skateboard/image_features_179.npy
+img_embeds/skis/image_features_23.npy
+img_embeds/skis/image_features_45.npy
+img_embeds/skis/image_features_67.npy
+img_embeds/skis/image_features_94.npy
+img_embeds/skis/image_features_126.npy
+img_embeds/skis/image_features_168.npy
+img_embeds/skis/image_features_218.npy
+img_embeds/skis/image_features_241.npy
+img_embeds/snowboard/image_features_21.npy
+img_embeds/snowboard/image_features_39.npy
+img_embeds/snowboard/image_features_68.npy
+img_embeds/snowboard/image_features_69.npy
+img_embeds/spoon/image_features_25.npy
+img_embeds/spoon/image_features_57.npy
+img_embeds/spoon/image_features_84.npy
+img_embeds/spoon/image_features_119.npy
+img_embeds/spoon/image_features_142.npy
+img_embeds/spoon/image_features_166.npy
+img_embeds/spoon/image_features_189.npy
+img_embeds/spoon/image_features_216.npy
+img_embeds/spoon/image_features_236.npy
+img_embeds/spoon/image_features_253.npy
+img_embeds/sports ball/image_features_19.npy
+img_embeds/sports ball/image_features_37.npy
+img_embeds/sports ball/image_features_56.npy
+img_embeds/sports ball/image_features_109.npy
+img_embeds/sports ball/image_features_133.npy
+img_embeds/sports ball/image_features_169.npy
+img_embeds/sports ball/image_features_187.npy
+img_embeds/sports ball/image_features_207.npy
+img_embeds/sports ball/image_features_225.npy
+img_embeds/sports ball/image_features_241.npy
+img_embeds/sports ball/image_features_263.npy
+img_embeds/stop sign/image_features_18.npy
+img_embeds/stop sign/image_features_34.npy
+img_embeds/stop sign/image_features_50.npy
+img_embeds/stop sign/image_features_69.npy
+img_embeds/stop sign/image_features_75.npy
+img_embeds/suitcase/image_features_38.npy
+img_embeds/suitcase/image_features_95.npy
+img_embeds/suitcase/image_features_130.npy
+img_embeds/suitcase/image_features_170.npy
+img_embeds/suitcase/image_features_215.npy
+img_embeds/suitcase/image_features_259.npy
+img_embeds/suitcase/image_features_303.npy
+img_embeds/surfboard/image_features_24.npy
+img_embeds/surfboard/image_features_53.npy
+img_embeds/surfboard/image_features_84.npy
+img_embeds/surfboard/image_features_103.npy
+img_embeds/surfboard/image_features_142.npy
+img_embeds/surfboard/image_features_173.npy
+img_embeds/surfboard/image_features_199.npy
+img_embeds/surfboard/image_features_217.npy
+img_embeds/surfboard/image_features_264.npy
+img_embeds/surfboard/image_features_269.npy
+img_embeds/tennis racket/image_features_18.npy
+img_embeds/tennis racket/image_features_47.npy
+img_embeds/tennis racket/image_features_67.npy
+img_embeds/tennis racket/image_features_89.npy
+img_embeds/tennis racket/image_features_109.npy
+img_embeds/tennis racket/image_features_128.npy
+img_embeds/tennis racket/image_features_151.npy
+img_embeds/tennis racket/image_features_171.npy
+img_embeds/tennis racket/image_features_195.npy
+img_embeds/tennis racket/image_features_213.npy
+img_embeds/tennis racket/image_features_225.npy
+img_embeds/tie/image_features_27.npy
+img_embeds/tie/image_features_61.npy
+img_embeds/tie/image_features_85.npy
+img_embeds/tie/image_features_104.npy
+img_embeds/tie/image_features_139.npy
+img_embeds/tie/image_features_163.npy
+img_embeds/tie/image_features_204.npy
+img_embeds/tie/image_features_228.npy
+img_embeds/tie/image_features_252.npy
+img_embeds/tie/image_features_254.npy
+img_embeds/toaster/image_features_9.npy
+img_embeds/toilet/image_features_17.npy
+img_embeds/toilet/image_features_34.npy
+img_embeds/toilet/image_features_52.npy
+img_embeds/toilet/image_features_70.npy
+img_embeds/toilet/image_features_88.npy
+img_embeds/toilet/image_features_113.npy
+img_embeds/toilet/image_features_131.npy
+img_embeds/toilet/image_features_157.npy
+img_embeds/toilet/image_features_174.npy
+img_embeds/toilet/image_features_179.npy
+img_embeds/toothbrush/image_features_24.npy
+img_embeds/toothbrush/image_features_55.npy
+img_embeds/toothbrush/image_features_57.npy
+img_embeds/traffic light/image_features_39.npy
+img_embeds/traffic light/image_features_95.npy
+img_embeds/traffic light/image_features_170.npy
+img_embeds/traffic light/image_features_218.npy
+img_embeds/traffic light/image_features_266.npy
+img_embeds/traffic light/image_features_345.npy
+img_embeds/traffic light/image_features_400.npy
+img_embeds/traffic light/image_features_452.npy
+img_embeds/traffic light/image_features_499.npy
+img_embeds/traffic light/image_features_541.npy
+img_embeds/traffic light/image_features_587.npy
+img_embeds/traffic light/image_features_637.npy
+img_embeds/train/image_features_18.npy
+img_embeds/train/image_features_38.npy
+img_embeds/train/image_features_56.npy
+img_embeds/train/image_features_74.npy
+img_embeds/train/image_features_93.npy
+img_embeds/train/image_features_112.npy
+img_embeds/train/image_features_136.npy
+img_embeds/train/image_features_155.npy
+img_embeds/train/image_features_177.npy
+img_embeds/train/image_features_190.npy
+img_embeds/truck/image_features_23.npy
+img_embeds/truck/image_features_45.npy
+img_embeds/truck/image_features_73.npy
+img_embeds/truck/image_features_96.npy
+img_embeds/truck/image_features_132.npy
+img_embeds/truck/image_features_156.npy
+img_embeds/truck/image_features_182.npy
+img_embeds/truck/image_features_203.npy
+img_embeds/truck/image_features_228.npy
+img_embeds/truck/image_features_254.npy
+img_embeds/truck/image_features_279.npy
+img_embeds/truck/image_features_301.npy
+img_embeds/truck/image_features_330.npy
+img_embeds/truck/image_features_362.npy
+img_embeds/truck/image_features_386.npy
+img_embeds/truck/image_features_415.npy
+img_embeds/tv/image_features_19.npy
+img_embeds/tv/image_features_37.npy
+img_embeds/tv/image_features_54.npy
+img_embeds/tv/image_features_75.npy
+img_embeds/tv/image_features_101.npy
+img_embeds/tv/image_features_126.npy
+img_embeds/tv/image_features_150.npy
+img_embeds/tv/image_features_174.npy
+img_embeds/tv/image_features_202.npy
+img_embeds/tv/image_features_220.npy
+img_embeds/tv/image_features_250.npy
+img_embeds/tv/image_features_269.npy
+img_embeds/tv/image_features_288.npy
+img_embeds/umbrella/image_features_26.npy
+img_embeds/umbrella/image_features_56.npy
+img_embeds/umbrella/image_features_82.npy
+img_embeds/umbrella/image_features_134.npy
+img_embeds/umbrella/image_features_166.npy
+img_embeds/umbrella/image_features_200.npy
+img_embeds/umbrella/image_features_226.npy
+img_embeds/umbrella/image_features_272.npy
+img_embeds/umbrella/image_features_316.npy
+img_embeds/umbrella/image_features_373.npy
+img_embeds/umbrella/image_features_413.npy
+img_embeds/vase/image_features_29.npy
+img_embeds/vase/image_features_63.npy
+img_embeds/vase/image_features_90.npy
+img_embeds/vase/image_features_113.npy
+img_embeds/vase/image_features_162.npy
+img_embeds/vase/image_features_205.npy
+img_embeds/vase/image_features_236.npy
+img_embeds/vase/image_features_263.npy
+img_embeds/vase/image_features_277.npy
+img_embeds/wine glass/image_features_47.npy
+img_embeds/wine glass/image_features_83.npy
+img_embeds/wine glass/image_features_141.npy
+img_embeds/wine glass/image_features_195.npy
+img_embeds/wine glass/image_features_245.npy
+img_embeds/wine glass/image_features_300.npy
+img_embeds/wine glass/image_features_343.npy
+img_embeds/zebra/image_features_39.npy
+img_embeds/zebra/image_features_92.npy
+img_embeds/zebra/image_features_149.npy
+img_embeds/zebra/image_features_196.npy
+img_embeds/zebra/image_features_256.npy
+img_embeds/zebra/image_features_268.npy
