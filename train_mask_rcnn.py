@@ -15,7 +15,8 @@ from argparse import ArgumentParser
 import wandb
 import torch
 from torchvision.models.detection import maskrcnn_resnet50_fpn, maskrcnn_resnet50_fpn_v2
-from torchvision.models.detection import MaskRCNN_ResNet50_FPN_Weights
+# import resnet wieghts for backbone
+from torchvision.models import ResNet50_Weights
 from torch.utils.data import Subset
 from instance_copy_paste.dataset import SynData, COCO_DETECTION
 from instance_copy_paste.copy_paste import InstanceCopyPaste, InstanceRetriever
@@ -99,8 +100,8 @@ train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers
 val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
 
 
-# Load pre-trained Mask R-CNN model
-model = maskrcnn_resnet50_fpn_v2(weights=None, num_classes=4)
+# Load pre-trained Mask R-CNN model with ImageNet backbone weights
+model = maskrcnn_resnet50_fpn_v2(weights_backbone=ResNet50_Weights.DEFAULT, num_classes=3)
 model.to(device)
 wandb.watch(model, log='all')
 
