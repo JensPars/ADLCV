@@ -6,6 +6,7 @@ import albumentations as A
 from copy import deepcopy
 from skimage.filters import gaussian
 import torch
+from torchvision import tv_tensors
 
 def image_copy_paste(img, paste_img, alpha, blend=True, sigma=1):
     if alpha is not None:
@@ -312,11 +313,12 @@ def copy_paste_class(dataset_class):
         
         
 
-        
+        image = (img_data["image"].clone().detach().float().requires_grad_(True))/255.0
         bboxes = torch.tensor(np.array([torch.tensor(x[:4]) for x in img_data["bboxes"]]))
-        labels =torch.tensor(np.array([torch.tensor(x[-2]) for x in img_data["bboxes"]]))
+        #bboxes = tv_tensors.BoundingBoxes(bboxes,format="XYXY",canvas_size=image.shape[-2:])
+        labels = torch.tensor(np.array([torch.tensor(x[-2]) for x in img_data["bboxes"]]))
         masks = torch.tensor(np.array([torch.tensor(x).float() for x in img_data["masks"]]))
-        image = torch.tensor(img_data["image"]).float().permute(2, 0, 1)
+        
 
         if len(bboxes) == 0:
             idx = random.randint(0, self.__len__() - 1)
@@ -328,7 +330,6 @@ def copy_paste_class(dataset_class):
         bboxes[:, 2:] += bboxes[:, :2]
         bboxes = bboxes.float()
         labels = labels.long()
-        masks = masks.permute(1, 2, 0)
 
 
         return image, {"masks": masks, "boxes": bboxes, "labels": labels}

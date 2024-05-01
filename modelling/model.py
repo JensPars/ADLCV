@@ -101,6 +101,10 @@ class DeepLabV3Lightning(LightningModule):
         print(outputs.shape)
         loss = self.loss(outputs, targets)
 
+        map_value = sel
+
+        self.
+
         # Logging
         self.log_dict({'val_loss': loss}, on_epoch=True)
         self.log("val_loss", loss, on_epoch=True) 
@@ -108,8 +112,6 @@ class DeepLabV3Lightning(LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)  # Adam optimizer
-
-        # Add learning rate scheduler (adjust hyperparameters as needed)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1) 
-        return [optimizer], [scheduler]
+        optimizer = torch.optim.AdamW(self.parameters(), lr=self.learning_rate)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=self.scheduler_factor, patience=self.scheduler_patience)
+        return {"optimizer": optimizer, "monitor": "val_loss", "lr_scheduler": scheduler,}
