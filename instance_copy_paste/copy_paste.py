@@ -11,7 +11,8 @@ class InstanceRetriever():
         self.instance_pool = instance_pool
 
     def get_instances(self, n_instances:int):
-        n_instances = random.randint(1, n_instances) #? Maybe to vary the number of instances pasted
+        n_instances = random.randint(1, n_instances) 
+        #? Sample the indicies such without replacement, such that it is unique instances. 
         instances = []
         for i in range(n_instances):
             instances.append(self.instance_pool[random.randint(0, len(self.instance_pool)-1)])
