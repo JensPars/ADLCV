@@ -22,8 +22,8 @@
 #BSUB -N
 ### -- Specify the output and error file. %J is the job-id --
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
-#BSUB -o gpu_%J.out
-#BSUB -e gpu_%J.err
+#BSUB -o batch_out/gpu_%J.out
+#BSUB -e batch_out/gpu_%J.err
 # -- end of LSF options --
 source /zhome/94/2/146581/.venv/bin/activate
 
