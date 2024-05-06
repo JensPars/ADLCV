@@ -11,7 +11,9 @@ from glob import glob
 import pickle
 import zlib
 import albumentations as A
+from torchvision import transforms as T
 import albumentations.pytorch as AT
+import pandas as pd
 
 def read_and_decompress(file):
     # Read the compressed mask from the pickle file
@@ -38,10 +40,11 @@ class SynData(Dataset):
         
         for cat_dir in cat_dirs:
             cat = cat_dir.split("/")[-1]
-            self.syn_imgs += sorted(glob(cat_dir + "/*.jpg"))
             self.syn_lbls += sorted(glob(cat_dir + "/*.pkl"))
-            self.cls += [cat_dict[cat]] * len(sorted(glob(cat_dir + "/*.jpg")))
+            # replace .pkl with .jpg and mask with img
+            self.cls += [cat_dict[cat]] * len(sorted(glob(cat_dir + "/*.pkl")))
             
+        self.syn_imgs += [f.replace(".pkl", ".jpg").replace("mask", "img") for f in self.syn_lbls]
         assert len(self.syn_imgs) == len(self.syn_lbls)
         self.fid = fid
 
@@ -203,7 +206,7 @@ class COCO_DETECTION(Dataset):
                 "labels": coco_data["labels"]
             }
         img, target = self.post_process(img, target)
-        return img, target
+        return img/255, target
 
 def _count_visible_keypoints(anno):
     return sum(sum(1 for v in ann["keypoints"][2::3] if v > 0) for ann in anno)
