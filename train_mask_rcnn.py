@@ -90,7 +90,7 @@ if args.syn_data == "True":
         A.PadIfNeeded(
             512, 512, border_mode=0
         ),  # pads with image in the center, not the top left like the paper
-        A.Resize(512, 512, p=1),
+        A.Resize(512, 512),
     ],
     bbox_params=A.BboxParams(
         format="coco", min_visibility=0.05, label_fields=["labels"]
@@ -110,8 +110,8 @@ val_dataset = CocoDetection(root=os.environ.get("COCO_DATA_DIR_VAL"), annFile='c
 val_dataset = datasets.wrap_dataset_for_transforms_v2(val_dataset, target_keys=["boxes", "labels", "masks"])
 
 # Create data loaders
-train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
-val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+val_loader = DataLoader(val_dataset, batch_size=4, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
 
 
 # Load pre-trained Mask R-CNN model
