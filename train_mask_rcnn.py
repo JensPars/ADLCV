@@ -30,7 +30,7 @@ def data_subset(dataset,fraction):
     indices = range(num_samples)
     return Subset(dataset, indices)
 
-syn_dataset = SynData(os.environ.get("SYN_DATA_DIR"), {"car": 2, "bus": 1, "boat": 3})
+syn_dataset = SynData("data/sdxl-turbo-corrputed", {"car": 2, "bus": 1, "boat": 3})
 instance_retriever = InstanceRetriever(syn_dataset)
 
 
@@ -110,8 +110,8 @@ val_dataset = CocoDetection(root=os.environ.get("COCO_DATA_DIR_VAL"), annFile='c
 val_dataset = datasets.wrap_dataset_for_transforms_v2(val_dataset, target_keys=["boxes", "labels", "masks"])
 
 # Create data loaders
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
-val_loader = DataLoader(val_dataset, batch_size=4, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=12, collate_fn=lambda x: tuple(zip(*x)))
+val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=12, collate_fn=lambda x: tuple(zip(*x)))
 
 
 # Load pre-trained Mask R-CNN model
@@ -145,7 +145,7 @@ for epoch in range(num_epochs):
     train_loss /= len(train_loader)
     print(f"Epoch [{epoch+1}/{num_epochs}] Training Loss: {train_loss:.4f}")
     wandb.log({"train_loss": train_loss})
-
+ 
     # Validation
     val_loss = 0
     with torch.no_grad():

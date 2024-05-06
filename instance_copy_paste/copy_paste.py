@@ -58,7 +58,7 @@ class InstanceCopyPaste():
         if isinstance(background, Image.Image): 
             background = np.array(background)
         if labels != []:
-            background = self._blend_masks2background(image, background, adjusted_masks, sigma = 1.0)
+            background = self._blend_masks2background(image, background, adjusted_masks, sigma = 10.0)
 
         return background, {"masks": adjusted_masks, "boxes": adjusted_bboxes, "labels": adjusted_labels}
 

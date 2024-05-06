@@ -46,6 +46,7 @@ class SynData(Dataset):
             
         self.syn_imgs += [f.replace(".pkl", ".jpg").replace("mask", "img") for f in self.syn_lbls]
         assert len(self.syn_imgs) == len(self.syn_lbls)
+        print(len(self.syn_lbls))
         self.fid = fid
 
 
