@@ -11,12 +11,12 @@ class InstanceRetriever():
         self.instance_pool = instance_pool
 
     def get_instances(self, n_instances:int):
-        n_instances = random.randint(1, n_instances) #? Maybe to vary the number of instances pasted
+        n_instances = random.randint(1, n_instances) 
+        #? Sample the indicies such without replacement, such that it is unique instances. 
         instances = []
         for i in range(n_instances):
             instances.append(self.instance_pool[random.randint(0, len(self.instance_pool)-1)])
         return instances
-
 class InstanceCopyPaste():
 
     def __init__(self, instance_retriever:InstanceRetriever, layering:str, n_instances:int, min_visible_pct:float=1.0, min_visible_keyspoint:int = 10):
@@ -37,6 +37,7 @@ class InstanceCopyPaste():
         instances = self.instance_retriever.get_instances(self.n_instances)
         new_masks = []
         new_bboxes = []
+        #instances = self._apply_layering(instances, masks, bboxes, labels)
         # Paste the new instances onto the background
         for instance in instances:
             out = self._paste_single_instance(instance['image'], 
@@ -53,14 +54,14 @@ class InstanceCopyPaste():
         labels.extend([instances[i]['labels'] for i in range(len(instances))])
 
         # Adjust the masks and bounding boxes to make sure they are consistent and that masks do not overlap
-        adjusted_masks, adjusted_bboxes = self._adjust_masks_and_bboxes(masks, bboxes)
+        adjusted_masks, adjusted_bboxes, adjusted_labels = self._adjust_masks_and_bboxes(masks, bboxes, labels)
         if isinstance(background, Image.Image): 
             background = np.array(background)
-        
-        background = self._blend_masks2background(image, background, adjusted_masks, sigma = 1.0)
+        if labels != []:
+            background = self._blend_masks2background(image, background, adjusted_masks, sigma = 5.0)
 
-        return background, {"masks": adjusted_masks, "boxes": adjusted_bboxes, "labels": labels}
-    
+        return background, {"masks": adjusted_masks, "boxes": adjusted_bboxes, "labels": adjusted_labels}
+
     def _blend_masks2background(self, original_image, pasted_image, mask, sigma:float):
         """
         Blend the pasted image with the background image.
@@ -80,7 +81,7 @@ class InstanceCopyPaste():
         blended_area = blended_area.astype(pasted_image.dtype)
         return blended_area
 
-    def _adjust_masks_and_bboxes(self, masks, bboxes):
+    def _adjust_masks_and_bboxes(self, masks, bboxes, labels):
         # Stack masks into a 3D numpy array
         masks = np.stack(masks, axis=0)
 
@@ -102,16 +103,19 @@ class InstanceCopyPaste():
         # Adjust the bounding boxes and remove masks with too few key points visible
         adjusted_bboxes = []
         adjusted_masks = []
-        assert len(new_masks) == len(bboxes), "Number of masks and bounding boxes do not match."
+        adjusted_labels = []
+        #assert len(new_masks) == len(bboxes), "Number of masks and bounding boxes do not match."
         assert len(new_masks) == len(visible_keypoints_per_mask), "Number of masks and visible keypoints do not match."
         
         for i in range(len(visible_keypoints_per_mask)):
             if visible_keypoints_per_mask[i] > self.min_visible_keyspoint:
-                adjusted_masks.append(new_masks[i])
                 x1, y1, x2, y2 = self.extract_bbox(new_masks[i])
-                adjusted_bboxes.append([(x1, y1, x2, y2)])
+                if (x2-x1 > 0) and (y2-y1 > 0): # validate bounding box
+                    adjusted_masks.append(new_masks[i])
+                    adjusted_bboxes.append([x1, y1, x2, y2])
+                    adjusted_labels.append(labels[i])
         
-        return adjusted_masks, adjusted_bboxes
+        return adjusted_masks, adjusted_bboxes, adjusted_labels
     
     def extract_bbox(self, mask):
         """
@@ -125,27 +129,6 @@ class InstanceCopyPaste():
         xmin, xmax = np.where(cols)[0][[0, -1]]
         assert ymax >= ymin and xmax >= xmin
         return int(xmin), int(ymin), int(xmax), int(ymax)
-      
-    # TODO: Implement the layering
-    #! DOES NOT WORK YET
-    def _collect_bg_instance(self, image, masks, bboxes):
-        """
-        Collect background instances such these 
-        can be pasted onto the background 
-        image on top of other new instances.
-        """
-        insts = zip(masks, bboxes)
-        bg_insts = []
-        for mask, bbox in insts:
-            cropped_image = self._crop_image(image, bbox)
-            cropped_mask = self._crop_image(mask, bbox)
-
-            bg_insts.append({
-                'image': cropped_image,
-                'masks': cropped_mask,
-                'bboxes': bbox
-            })
-        return bg_insts
 
     def _crop_image(self, image, bbox):
         """

@@ -3,6 +3,7 @@ from torchvision import datasets
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 from tqdm import tqdm
+import numpy as np
 
 
 import albumentations.pytorch as AT
@@ -28,9 +29,10 @@ def data_subset(dataset,fraction):
     indices = range(num_samples)
     return Subset(dataset, indices)
 
-syn_dataset = SynData("../sdxl-turbo", {"car": 2, "bus": 1, "boat": 3})
+syn_dataset = SynData("sdxl-turbo", {"car": 2, "bus": 1, "boat": 3})
 instance_retriever = InstanceRetriever(syn_dataset)
 
+print(len(syn_dataset))
 
 # Argument parsing
 parser = ArgumentParser(description="Choose the COCO dataset version for training.")
@@ -50,7 +52,7 @@ val_transform = transforms.Compose([
     #A.Resize(512, 512),
 ])
 
-inst_transform = transform = A.Compose(
+inst_transform  = A.Compose(
     [
         A.RandomScale(
             scale_limit=(-0.9, 1), p=1
@@ -74,19 +76,48 @@ transform = A.Compose([
 
 ],bbox_params=A.BboxParams(format="coco"))
 if args.copy_paste == "True":
-    train_dataset = CocoDetectionCP(root='/work3/s194649/train2017', annFile='car_boat_bus_train.json', transforms=transform)
+    train_dataset = CocoDetectionCP(root='data/val2107', annFile='car_boat_bus_val.json', transforms=transform)
 else:
-    train_dataset = CocoDetection(root='/work3/s194649/val2017', annFile='car_boat_bus_train.json', transform=val_transform)
+    train_dataset = CocoDetection(root='data/val2017', annFile='car_boat_bus_val.json', transform=val_transform)
     train_dataset = datasets.wrap_dataset_for_transforms_v2(train_dataset, target_keys=["boxes", "labels", "masks"])
 
 if args.syn_data == "True":
+    transform = A.Compose(
+    [
+        A.RandomScale(
+            scale_limit=(-0.9, 1), p=1
+        ),  # LargeScaleJitter from scale of 0.1 to 2
+        A.PadIfNeeded(
+            512, 512, border_mode=0
+        ),  # pads with image in the center, not the top left like the paper
+        A.Resize(512, 512),
+    ],
+    bbox_params=A.BboxParams(
+        format="coco", min_visibility=0.05, label_fields=["labels"]
+        ),
+    )
     train_dataset  = COCO_DETECTION(
-    '/work3/s194649/val2017',
+    'data/val2017',
     "car_boat_bus_val.json",
     categories=["boat", "car", "bus"],
-    transform=transform,
+    transform=inst_transform,
     instance_copy_paste=InstanceCopyPaste(instance_retriever, "random", 5, 0.5, 20),
 )
+    
+print(f"Number of training samples: {len(train_dataset)}")
+    
+#plot the first 10 images
+for i in range(10):
+    sample = train_dataset[i]
+    print(np.unique(sample[0]))
+    image, target = sample
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+    ax.imshow(image.permute(1, 2, 0))
+    for box in target["boxes"]:
+        xmin, ymin, xmax, ymax = box
+        rect = plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor="red", linewidth=2)
+        ax.add_patch(rect)
+    plt.show()
 
 
 
