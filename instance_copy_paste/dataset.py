@@ -53,7 +53,7 @@ class SynData(Dataset):
             A.PadIfNeeded(img_size, img_size, border_mode=0), #pads with image in the center, not the top left like the paper
             A.Resize(img_size, img_size, p=1),
             A.HorizontalFlip(p=0.5),
-            A.RandomRotate90(p=0.2),
+            A.Rotate(limit=15, p=0.5),
         ], bbox_params=A.BboxParams(format="coco", min_visibility=0.05))
 
     def _get_bbox(self, mask):
