@@ -17,7 +17,6 @@ class InstanceRetriever():
         for i in range(n_instances):
             instances.append(self.instance_pool[random.randint(0, len(self.instance_pool)-1)])
         return instances
-
 class InstanceCopyPaste():
 
     def __init__(self, instance_retriever:InstanceRetriever, layering:str, n_instances:int, min_visible_pct:float=1.0, min_visible_keyspoint:int = 10):
@@ -38,6 +37,7 @@ class InstanceCopyPaste():
         instances = self.instance_retriever.get_instances(self.n_instances)
         new_masks = []
         new_bboxes = []
+        #instances = self._apply_layering(instances, masks, bboxes, labels)
         # Paste the new instances onto the background
         for instance in instances:
             out = self._paste_single_instance(instance['image'], 
@@ -61,7 +61,7 @@ class InstanceCopyPaste():
             background = self._blend_masks2background(image, background, adjusted_masks, sigma = 1.0)
 
         return background, {"masks": adjusted_masks, "boxes": adjusted_bboxes, "labels": adjusted_labels}
-    
+
     def _blend_masks2background(self, original_image, pasted_image, mask, sigma:float):
         """
         Blend the pasted image with the background image.
@@ -129,27 +129,6 @@ class InstanceCopyPaste():
         xmin, xmax = np.where(cols)[0][[0, -1]]
         assert ymax >= ymin and xmax >= xmin
         return int(xmin), int(ymin), int(xmax), int(ymax)
-      
-    # TODO: Implement the layering
-    #! DOES NOT WORK YET
-    def _collect_bg_instance(self, image, masks, bboxes):
-        """
-        Collect background instances such these 
-        can be pasted onto the background 
-        image on top of other new instances.
-        """
-        insts = zip(masks, bboxes)
-        bg_insts = []
-        for mask, bbox in insts:
-            cropped_image = self._crop_image(image, bbox)
-            cropped_mask = self._crop_image(mask, bbox)
-
-            bg_insts.append({
-                'image': cropped_image,
-                'masks': cropped_mask,
-                'bboxes': bbox
-            })
-        return bg_insts
 
     def _crop_image(self, image, bbox):
         """
