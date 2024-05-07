@@ -18,6 +18,45 @@ from torchvision.models import ResNet50_Weights
 from dotenv import load_dotenv
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from torchvision.utils import make_grid
+import wandb
+import numpy as np
+
+def plot_images_with_boxes_and_masks(images, targets, num_images=4):
+    fig, axs = plt.subplots(nrows=1, ncols=num_images, figsize=(15, 5))
+    if num_images == 1:
+        axs = [axs]  # Make sure axs is iterable for single-image case
+
+    for idx in range(num_images):
+        img = images[idx].permute(1, 2, 0) # Convert image to H, W, C format 
+        img = img.clone().detach().cpu().numpy() 
+        axs[idx].imshow(img, cmap='gray')  # Display the background image
+
+        if 'masks' in targets[idx]:
+            all_masks = targets[idx]['masks']
+            for mask in all_masks:
+                mask = mask.squeeze()  # Assuming masks are (1, H, W) and removing singular dimensions
+                rgba_color_mask = np.zeros((*mask.shape, 4))  # Create an RGBA mask
+
+                # Set the color of the mask, here it is blue (you can choose any other color)
+                rgba_color_mask[:, :, 2] = 1  # Blue channel
+                rgba_color_mask[:, :, 3] = mask.clone().detach().cpu().numpy() # Alpha channel gets the mask data 
+
+                # Overlaying the color mask with transparency where mask values are zero
+                axs[idx].imshow(rgba_color_mask)
+
+        for box in targets[idx]['boxes']:
+            box = box.cpu().numpy()
+            rect = patches.Rectangle(
+                (box[0], box[1]), box[2] - box[0], box[3] - box[1],
+                linewidth=2, edgecolor='r', facecolor='none')
+            axs[idx].add_patch(rect)
+        axs[idx].axis('off')
+    plt.tight_layout()
+    return fig
+
 load_dotenv()
 def data_subset(dataset,fraction):
     # Calculate half of the length of the dataset
@@ -73,17 +112,35 @@ class MaskRCNNModel(LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, targets = batch
-        loss_dict = self.model(images, targets)
-        losses = sum(loss for loss in loss_dict.values())
-        self.log('train_loss', losses)
+        losses = self.compute_losses(images, targets)
+        
+        # Plot and log images each epoch
+        if batch_idx == 0:  # Just log/images for the first batch
+            fig = plot_images_with_boxes_and_masks(images, targets)
+            images = wandb.Image(fig, caption="Train Images")
+            wandb.log({"train_examples": images})
+            plt.close(fig)
+        
         return losses
 
     def validation_step(self, batch, batch_idx):
         self.model.train()
         images, targets = batch
+        losses = self.compute_losses(images, targets)
+        
+        # Plot and log images each epoch
+        if batch_idx == 0:  # Just log images for the first batch
+            fig = plot_images_with_boxes_and_masks(images, targets)
+            images = wandb.Image(fig, caption="Validation Images")
+            wandb.log({"val_examples": images})
+            plt.close(fig)
+        
+        return losses
+
+    def compute_losses(self, images, targets):
         loss_dict = self.model(images, targets)
         losses = sum(loss for loss in loss_dict.values())
-        self.log('val_loss', losses)
+        self.log('train_loss' if self.training else 'val_loss', losses, on_epoch=True, on_step=False)
         return losses
     
     def test_step(self, batch, batch_idx):
@@ -100,6 +157,7 @@ class MaskRCNNModel(LightningModule):
 
     def train_dataloader(self):
         train_dataset = self._get_dataset(train=True)
+        print("Length of train:", len(train_dataset))
         return DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
 
     def val_dataloader(self):

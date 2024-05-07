@@ -105,6 +105,7 @@ if args.syn_data == "True":
     )
 
 train_dataset = data_subset(train_dataset,args.data_fraction)
+print(len(train_dataset))
 
 val_dataset = CocoDetection(root=os.environ.get("COCO_DATA_DIR_VAL"), annFile='car_boat_bus_val.json', transform=val_transform)
 val_dataset = datasets.wrap_dataset_for_transforms_v2(val_dataset, target_keys=["boxes", "labels", "masks"])
