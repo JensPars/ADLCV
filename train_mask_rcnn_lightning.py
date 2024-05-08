@@ -79,12 +79,13 @@ class MaskRCNNModel(LightningModule):
         self.init_transforms()
 
         # Create instance retriever if using synthetic data
-        if args.syn_data == 'True':
+        if args.syn_data:
             syn_dataset = SynData("sdxl-turbo", {"car": 2, "bus": 1, "boat": 3})
             self.instance_retriever = InstanceRetriever(syn_dataset)
 
     def init_transforms(self):
-        if self.args.copy_paste == "True":
+        if self.args.copy_paste:
+            print("Using simple copy paste")
             self.train_transform = A.Compose([
                 A.RandomScale(scale_limit=(-0.9, 1), p=1),
                 A.PadIfNeeded(512, 512, border_mode=0),
@@ -92,7 +93,8 @@ class MaskRCNNModel(LightningModule):
                 CopyPaste(blend=True, sigma=1, pct_objects_paste=0.5, p=1),
                 AT.ToTensorV2(),
             ], bbox_params=A.BboxParams(format="coco"))
-        elif self.args.syn_data == "True":
+        elif self.args.syn_data:
+            print("Using Synthetic Data")
             self.train_transform = A.Compose(
                     [
                         A.RandomScale(
@@ -107,6 +109,7 @@ class MaskRCNNModel(LightningModule):
                             format="coco", min_visibility=0.05, label_fields=["labels"]),
                         )
         else:
+            print("No augmentation")
             self.train_transform = self.val_transform
 
     def forward(self, x):
@@ -154,7 +157,7 @@ class MaskRCNNModel(LightningModule):
         return outputs
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.model.parameters(), lr=2e-4)
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, verbose=True)
         return {'optimizer': optimizer, 'lr_scheduler': scheduler, 'monitor': 'val_loss'}
 
@@ -192,18 +195,18 @@ class MaskRCNNModel(LightningModule):
 
 # Parsing Arguments and Initialize components
 parser = ArgumentParser()
-parser.add_argument("--copy_paste", type=str, default="False")
+parser.add_argument("--copy_paste", type=bool, default=False)
 parser.add_argument("--data_fraction", type=float, default=1.)
-parser.add_argument("--syn_data", type=str, default="False")
+parser.add_argument("--syn_data", type=bool, default=False)
+parser.add_argument("--lr", type=float, default=3e-5)
 args = parser.parse_args()
 
 # Trainer setup
 logger = WandbLogger(project="copy-paste-project", log_model="all")
 checkpoint_callback = ModelCheckpoint(dirpath="./model_checkpoints", save_top_k=1, monitor="val_loss")
-trainer = Trainer(max_epochs=50, logger=logger, callbacks=[checkpoint_callback, LearningRateMonitor(logging_interval='epoch')],accelerator="auto")
+trainer = Trainer(max_epochs=100, logger=logger, callbacks=[checkpoint_callback, LearningRateMonitor(logging_interval='epoch')],accelerator="auto")
 
 # Model instantiation and training
 model = MaskRCNNModel(args)
 trainer.fit(model)
-#test with the best model
-trainer.test(ckpt_path=checkpoint_callback.best_model_path)
+trainer.test(ckpt_path="best")  # Running testing after training
