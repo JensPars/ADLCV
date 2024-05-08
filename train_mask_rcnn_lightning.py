@@ -13,6 +13,7 @@ import albumentations.pytorch as AT
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
+from lightning.pytorch.cli import LightningCLI
 from simple_copy_paste.simple_copy_paste import CopyPaste
 from torchvision.models import ResNet50_Weights
 from dotenv import load_dotenv
@@ -66,10 +67,15 @@ def data_subset(dataset,fraction):
     return Subset(dataset, indices)
 
 class MaskRCNNModel(LightningModule):
-    def __init__(self, args):
+    def __init__(self, syn_data=False, copy_paste=False, data_fraction=1.0, lr=3e-5, batch_size=8, num_workers=0):
         super().__init__()
-        self.args = args
-        self.model = maskrcnn_resnet50_fpn_v2(eights_backbone=ResNet50_Weights.DEFAULT,num_classes=4)
+        self.syndata = syn_data
+        self.copy_paste = copy_paste
+        self.data_fraction = data_fraction
+        self.lr = lr
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.model = maskrcnn_resnet50_fpn_v2(weights_backbone=ResNet50_Weights.DEFAULT,num_classes=4)
         self.val_transform = transforms.Compose([
             transforms.ToTensor(),
         ])
@@ -77,12 +83,12 @@ class MaskRCNNModel(LightningModule):
         self.init_transforms()
 
         # Create instance retriever if using synthetic data
-        if args.syn_data:
+        if self.syn_data:
             syn_dataset = SynData("sdxl-turbo", {"car": 2, "bus": 1, "boat": 3})
             self.instance_retriever = InstanceRetriever(syn_dataset)
 
     def init_transforms(self):
-        if self.args.copy_paste:
+        if self.copy_paste:
             print("Using simple copy paste")
             self.train_transform = A.Compose([
                 A.RandomScale(scale_limit=(-0.9, 1), p=1),
@@ -91,7 +97,7 @@ class MaskRCNNModel(LightningModule):
                 CopyPaste(blend=True, sigma=1, pct_objects_paste=0.5, p=1),
                 AT.ToTensorV2(),
             ], bbox_params=A.BboxParams(format="coco"))
-        elif self.args.syn_data:
+        elif self.syn_data:
             print("Using Synthetic Data")
             self.train_transform = A.Compose(
                     [
@@ -154,30 +160,30 @@ class MaskRCNNModel(LightningModule):
         return outputs
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr)
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, verbose=True)
         return {'optimizer': optimizer, 'lr_scheduler': scheduler, 'monitor': 'val_loss'}
 
     def train_dataloader(self):
         train_dataset = self._get_dataset(train=True)
         print("Length of train:", len(train_dataset))
-        return DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+        return DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
 
     def val_dataloader(self):
         val_dataset = self._get_dataset(train=False)
-        return DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+        return DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
     
     def test_dataloader(self):
         test_dataset = self._get_dataset(train=False)  # Assuming same settings for val and test for simplicity
-        return DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=0, collate_fn=lambda x: tuple(zip(*x)))
+        return DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
 
     def _get_dataset(self, train=True):
         # Dataset fetching logic depending on the flag
         root_dir = os.environ.get("COCO_DATA_DIR_TRAIN" if train else "COCO_DATA_DIR_VAL")
         ann_file = 'car_boat_bus_train.json' if train else 'car_boat_bus_val.json'
-        if self.args.copy_paste == "True" and train:
+        if self.copy_paste and train:
             dataset = CocoDetectionCP(root=root_dir, annFile=ann_file, transforms=self.train_transform)
-        elif self.args.syn_data == "True" and train:
+        elif self.syn_data and train:
             dataset = COCO_DETECTION(
                 os.environ.get("COCO_DATA_DIR_TRAIN"),
                 "car_boat_bus_train.json",
@@ -188,9 +194,11 @@ class MaskRCNNModel(LightningModule):
         else:
             dataset = CocoDetection(root=root_dir, annFile=ann_file, transform=self.val_transform)
             dataset = datasets.wrap_dataset_for_transforms_v2(dataset, target_keys=["boxes", "labels", "masks"])
-        return data_subset(dataset, self.args.data_fraction)
+        return data_subset(dataset, self.data_fraction)
 
-
+def cli_main():
+    cli = LightningCLI(MaskRCNNModel)
+    
 # Parsing Arguments and Initialize components
 parser = ArgumentParser()
 parser.add_argument("--copy_paste", type=bool, default=False)
