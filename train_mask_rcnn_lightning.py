@@ -25,35 +25,37 @@ from torchvision.utils import make_grid
 import wandb
 import numpy as np
 
+
 def plot_images_with_boxes_and_masks(images, targets, num_images=4):
     fig, axs = plt.subplots(nrows=1, ncols=num_images, figsize=(15, 5))
     if num_images == 1:
-        axs = [axs]  # Make sure axs is iterable for single-image case
+        axs = [axs]  # Ensure axs is iterable when num_images=1
 
-    for idx in range(num_images):
-        img = images[idx].permute(1, 2, 0) # Convert image to H, W, C format 
-        img = img.clone().detach().cpu().numpy() 
+    for idx in range(min(num_images, len(images))):
+        img = images[idx].permute(1, 2, 0).clone().detach().cpu().numpy()  # Convert image from (C, H, W) to (H, W, C)
         axs[idx].imshow(img, cmap='gray')  # Display the background image
 
         if 'masks' in targets[idx]:
             all_masks = targets[idx]['masks']
             for mask in all_masks:
                 mask = mask.squeeze()  # Assuming masks are (1, H, W) and removing singular dimensions
-                rgba_color_mask = np.zeros((*mask.shape, 4))  # Create an RGBA mask
+                rgba_mask = np.zeros((*mask.shape, 4))  # Create an RGBA mask
 
-                # Set the color of the mask, here it is blue (you can choose any other color)
-                rgba_color_mask[:, :, 2] = 1  # Blue channel
-                rgba_color_mask[:, :, 3] = mask.clone().detach().cpu().numpy() # Alpha channel gets the mask data 
+                rgba_mask[:, :, 2] = 1.0  # Blue channel
+                mask_data = mask.clone().detach().cpu().numpy()
+                rgba_mask[:, :, 3] = mask_data * 0.5  # Alpha channel, scale mask by 0.5 for transparency
 
-                # Overlaying the color mask with transparency where mask values are zero
-                axs[idx].imshow(rgba_color_mask)
+                # Overlay the color mask with transparency where mask values are zero
+                axs[idx].imshow(rgba_mask)
 
+        # Draw bounding boxes
         for box in targets[idx]['boxes']:
             box = box.cpu().numpy()
             rect = patches.Rectangle(
                 (box[0], box[1]), box[2] - box[0], box[3] - box[1],
                 linewidth=2, edgecolor='r', facecolor='none')
             axs[idx].add_patch(rect)
+
         axs[idx].axis('off')
     plt.tight_layout()
     return fig
@@ -121,13 +123,14 @@ class MaskRCNNModel(LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, targets = batch
+        print(np.unique(images[0].clone().detach().cpu().numpy()))
         losses = self.compute_losses(images, targets)
         
         # Plot and log images each epoch
         if batch_idx == 0:  # Just log/images for the first batch
             fig = plot_images_with_boxes_and_masks(images, targets)
             images = wandb.Image(fig, caption="Train Images")
-            wandb.log({"train_examples": images})
+            self.log({"train_examples": images})
             plt.close(fig)
         
         return losses
@@ -141,7 +144,7 @@ class MaskRCNNModel(LightningModule):
         if batch_idx == 0:  # Just log images for the first batch
             fig = plot_images_with_boxes_and_masks(images, targets)
             images = wandb.Image(fig, caption="Validation Images")
-            wandb.log({"val_examples": images})
+            self.log({"val_examples": images})
             plt.close(fig)
         
         return losses
