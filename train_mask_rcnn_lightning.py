@@ -10,14 +10,16 @@ from instance_copy_paste.dataset import SynData, COCO_DETECTION
 from instance_copy_paste.copy_paste import InstanceCopyPaste, InstanceRetriever
 import albumentations as A
 import albumentations.pytorch as AT
+import lightning.pytorch as pl
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
-from lightning.pytorch.cli import LightningCLI
+from lightning.pytorch.cli import LightningCLI, SaveConfigCallback
 from simple_copy_paste.simple_copy_paste import CopyPaste
 from torchvision.models import ResNet50_Weights
 from dotenv import load_dotenv
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
+from pytorch_lightning.loggers import Logger
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -68,10 +70,21 @@ def data_subset(dataset,fraction):
     indices = range(num_samples)
     return Subset(dataset, indices)
 
-class MaskRCNNModel(LightningModule):
-    def __init__(self, syn_data=False, copy_paste=False, data_fraction=1.0, lr=3e-5, batch_size=8, num_workers=0):
+class MaskRCNNModel(pl.LightningModule):
+    def __init__(self, syn_data: bool = False, copy_paste: bool = False, data_fraction: float = 1.0, lr: float = 3e-5, batch_size: int = 8, num_workers: int = 0):
+        """
+        Initialize the MaskRCNNModel.
+
+        Args:
+            syn_data (bool, optional): Whether to use synthetic data. Defaults to False.
+            copy_paste (bool, optional): Whether to use simple copy paste. Defaults to False.
+            data_fraction (float, optional): Fraction of the dataset to use. Defaults to 1.0.
+            lr (float, optional): Learning rate for the optimizer. Defaults to 3e-5.
+            batch_size (int, optional): Batch size for training and validation. Defaults to 8.
+            num_workers (int, optional): Number of workers for data loading. Defaults to 0.
+        """
         super().__init__()
-        self.syndata = syn_data
+        self.syn_data = syn_data
         self.copy_paste = copy_paste
         self.data_fraction = data_fraction
         self.lr = lr
@@ -84,7 +97,72 @@ class MaskRCNNModel(LightningModule):
         self.map_metric = MeanAveragePrecision()
         self.init_transforms()
 
-        # Create instance retriever if using synthetic data
+    def forward(self, x):
+        return self.model(x)
+
+    def training_step(self, batch, batch_idx):
+        images, targets = batch
+        # print(np.unique(images[0].clone().detach().cpu().numpy()))
+        losses = self.compute_losses(images, targets)
+        
+        # Plot and log images each epoch
+       # if batch_idx == 0:  # Just log/images for the first batch
+       #     fig = plot_images_with_boxes_and_masks(images, targets)
+       #     images = wandb.Image(fig, caption="Train Images")
+       #     self.log({"train_examples": images})
+       #     plt.close(fig)
+       # log loss
+        self.log('train_loss', losses, on_epoch=True, on_step=False)
+        return losses
+
+    def validation_step(self, batch, batch_idx):
+        self.model.train()
+        images, targets = batch
+        losses = self.compute_losses(images, targets)
+        self.log('val_loss', losses, on_epoch=True, on_step=False)
+        
+        # Plot and log images each epoch
+#        if batch_idx == 0:  # Just log images for the first batch
+#            fig = plot_images_with_boxes_and_masks(images, targets)
+#            images = wandb.Image(fig, caption="Validation Images")
+#            self.log({"val_examples": images})
+#            plt.close(fig)
+        
+        #return losses
+
+    def compute_losses(self, images, targets):
+        loss_dict = self.model(images, targets)
+        losses = sum(loss for loss in loss_dict.values())
+        self.log('train_loss' if self.training else 'val_loss', losses, on_epoch=True, on_step=False)
+        return losses
+    
+    def test_step(self, batch, batch_idx):
+        images, targets = batch
+        outputs = self.forward(images)   # Get model predictions
+        # update the Mean Average Precision metric
+        self.map_metric.update(outputs, targets)
+        return outputs
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, verbose=True)
+        return {'optimizer': optimizer, 'lr_scheduler': scheduler, 'monitor': 'val_loss'}
+
+    
+class DM(pl.LightningDataModule):
+    def __init__(self, data_dir: str = "path/to/dir", batch_size: int = 32, data_fraction: float = 1.0, syn_data: bool = False, copy_paste: bool = False, num_workers: int = 0):
+        super().__init__()
+        self.data_dir = data_dir
+        self.batch_size = batch_size
+        self.data_fraction = data_fraction
+        self.val_transform = transforms.Compose([
+            transforms.ToTensor(),
+        ])
+        self.init_transforms()
+        self.syn_data = syn_data
+        self.copy_paste = copy_paste
+        self.num_workers = num_workers
+            # Create instance retriever if using synthetic data
         if self.syn_data:
             syn_dataset = SynData("sdxl-turbo", {"car": 2, "bus": 1, "boat": 3})
             self.instance_retriever = InstanceRetriever(syn_dataset)
@@ -118,68 +196,7 @@ class MaskRCNNModel(LightningModule):
             print("No augmentation")
             self.train_transform = self.val_transform
 
-    def forward(self, x):
-        return self.model(x)
-
-    def training_step(self, batch, batch_idx):
-        images, targets = batch
-        print(np.unique(images[0].clone().detach().cpu().numpy()))
-        losses = self.compute_losses(images, targets)
-        
-        # Plot and log images each epoch
-        if batch_idx == 0:  # Just log/images for the first batch
-            fig = plot_images_with_boxes_and_masks(images, targets)
-            images = wandb.Image(fig, caption="Train Images")
-            self.log({"train_examples": images})
-            plt.close(fig)
-        
-        return losses
-
-    def validation_step(self, batch, batch_idx):
-        self.model.train()
-        images, targets = batch
-        losses = self.compute_losses(images, targets)
-        
-        # Plot and log images each epoch
-        if batch_idx == 0:  # Just log images for the first batch
-            fig = plot_images_with_boxes_and_masks(images, targets)
-            images = wandb.Image(fig, caption="Validation Images")
-            self.log({"val_examples": images})
-            plt.close(fig)
-        
-        return losses
-
-    def compute_losses(self, images, targets):
-        loss_dict = self.model(images, targets)
-        losses = sum(loss for loss in loss_dict.values())
-        self.log('train_loss' if self.training else 'val_loss', losses, on_epoch=True, on_step=False)
-        return losses
     
-    def test_step(self, batch, batch_idx):
-        images, targets = batch
-        outputs = self.forward(images)   # Get model predictions
-        # update the Mean Average Precision metric
-        self.map_metric.update(outputs, targets)
-        return outputs
-
-    def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, verbose=True)
-        return {'optimizer': optimizer, 'lr_scheduler': scheduler, 'monitor': 'val_loss'}
-
-    def train_dataloader(self):
-        train_dataset = self._get_dataset(train=True)
-        print("Length of train:", len(train_dataset))
-        return DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
-
-    def val_dataloader(self):
-        val_dataset = self._get_dataset(train=False)
-        return DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
-    
-    def test_dataloader(self):
-        test_dataset = self._get_dataset(train=False)  # Assuming same settings for val and test for simplicity
-        return DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
-
     def _get_dataset(self, train=True):
         # Dataset fetching logic depending on the flag
         root_dir = os.environ.get("COCO_DATA_DIR_TRAIN" if train else "COCO_DATA_DIR_VAL")
@@ -198,24 +215,37 @@ class MaskRCNNModel(LightningModule):
             dataset = CocoDetection(root=root_dir, annFile=ann_file, transform=self.val_transform)
             dataset = datasets.wrap_dataset_for_transforms_v2(dataset, target_keys=["boxes", "labels", "masks"])
         return data_subset(dataset, self.data_fraction)
+        
+    def setup(self, stage=None):
+        if stage == 'fit' or stage is None:
+            self.train = self._get_dataset(train=True)
+            self.val = self._get_dataset(train=False)
+        if stage == 'test' or stage is None:
+            self.test = self._get_dataset(train=False)
+    
+    def train_dataloader(self):
+        return DataLoader(self.train, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
+    
+    def val_dataloader(self):
+        return DataLoader(self.val, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
+    
+    def test_dataloader(self):
+        return DataLoader(self.test, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, collate_fn=lambda x: tuple(zip(*x)))
+    
+        
+        
+
+class LoggerSaveConfigCallback(SaveConfigCallback):
+    def save_config(self, trainer: Trainer, pl_module: LightningModule, stage: str) -> None:
+        if isinstance(trainer.logger, Logger):
+            config = self.parser.dump(self.config, skip_none=False)  # Required for proper reproducibility
+            trainer.logger.log_hyperparams({"config": config})
 
 def cli_main():
-    cli = LightningCLI(MaskRCNNModel)
+    cli = LightningCLI(MaskRCNNModel,
+                       DM,
+                       save_config_kwargs={"overwrite": True},
+                       save_config_callback=LoggerSaveConfigCallback)
     
-# Parsing Arguments and Initialize components
-parser = ArgumentParser()
-parser.add_argument("--copy_paste", type=bool, default=False)
-parser.add_argument("--data_fraction", type=float, default=1.)
-parser.add_argument("--syn_data", type=bool, default=False)
-parser.add_argument("--lr", type=float, default=3e-5)
-args = parser.parse_args()
-
-# Trainer setup
-logger = WandbLogger(project="copy-paste-project", log_model="all")
-checkpoint_callback = ModelCheckpoint(dirpath="./model_checkpoints", save_top_k=1, monitor="val_loss")
-trainer = Trainer(max_epochs=100, logger=logger, callbacks=[checkpoint_callback, LearningRateMonitor(logging_interval='epoch')],accelerator="auto")
-
-# Model instantiation and training
-model = MaskRCNNModel(args)
-trainer.fit(model)
-trainer.test(ckpt_path="best")  # Running testing after training
+if __name__ == '__main__':
+    cli_main()
