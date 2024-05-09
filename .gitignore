@@ -12,6 +12,10 @@ __pycache__/
 wandb/
 *.jpg
 *.png
+*.pdf
+*.pptx
+
+sdxl-turbo/
 
 generation_pipeline/fig/1/giraffe/img_263936987.jpg
 generation_pipeline/fig/1/giraffe/img_483911026.jpg

@@ -1,5 +1,5 @@
-if __name__ == "__main__":
-    from setupHF_cache import *
+#if __name__ == "__main__":
+    #from setupHF_cache import *
 import pickle
 import zlib
 from glob import glob
@@ -26,9 +26,10 @@ class AutoSamPipeline:
         efficientvit_sam = efficientvit_sam.cuda().eval()
         self.efficientvit_sam_predictor = EfficientViTSamPredictor(efficientvit_sam)
      
-    def forward(self, img):
+    def forward(self, img, class_idx):
         out = self.detector(img)
         if len(out)>0:
+            out = [o for o in out if o['label']==class_idx]
             box = out[np.argmax([o['score'] for o in out])]['box']
             # Convert box to the format expected by EfficientViTSamPredictor
             # Typically, it's [xmin, ymin, xmax, ymax]
