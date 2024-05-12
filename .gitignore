@@ -1,6 +1,8 @@
+lightning_logs/
 .env
 venv
 puppies
+data
 imgs
 xl0_decoder.onnx
 xl0_encoder.onnx
@@ -19,6 +21,7 @@ sdxl-turbo/
 *.pdf
 *.pptx
 *.sh
+*.pkl
 
 generation_pipeline/fig/1/giraffe/img_263936987.jpg
 generation_pipeline/fig/1/giraffe/img_483911026.jpg
@@ -894,3 +897,25 @@ img_embeds/zebra/image_features_256.npy
 img_embeds/zebra/image_features_268.npy
 bjob_syndata_0.025.sh
 bjob_vanil_0.025.sh
+copy-paste-project/config.yaml
+copy-paste-project/bet8e0mm/checkpoints/epoch=0-step=53.ckpt
+copy-paste-project/bet8e0mm/checkpoints/epoch=1-step=106.ckpt
+copy-paste-project/bet8e0mm/checkpoints/epoch=2-step=159.ckpt
+copy-paste-project/c4rmns04/checkpoints/epoch=1-step=106.ckpt
+copy-paste-project/c4rmns04/checkpoints/epoch=3-step=212.ckpt
+copy-paste-project/c4rmns04/checkpoints/epoch=4-step=265.ckpt
+copy-paste-project/copy-paste-project/l7z8abgj/checkpoints/epoch=81-step=4346.ckpt
+copy-paste-project/uvvlp3ae/checkpoints/epoch=25-step=2730.ckpt
+
+lightning_logs/version_0/config.yaml
+lightning_logs/version_0/events.out.tfevents.1715268909.n-62-12-19.4328.0
+lightning_logs/version_0/hparams.yaml
+lightning_logs/version_1/config.yaml
+lightning_logs/version_1/events.out.tfevents.1715269098.n-62-20-9.21162.0
+lightning_logs/version_1/hparams.yaml
+lightning_logs/version_2/config.yaml
+lightning_logs/version_2/events.out.tfevents.1715269266.n-62-20-9.14793.0
+lightning_logs/version_2/hparams.yaml
+lightning_logs/version_3/config.yaml
+lightning_logs/version_3/events.out.tfevents.1715294118.n-62-20-9.29085.0
+lightning_logs/version_3/hparams.yaml

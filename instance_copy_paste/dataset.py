@@ -51,23 +51,31 @@ class SynData(Dataset):
 
 
     def get_transform(self):
-        img_size = random.randint(64,256)
+        img_size = random.randint(32, 256)
         return A.Compose([
-            A.RandomScale(scale_limit=(-0.9, 1), p=1), #LargeScaleJitter from scale of 0.1 to 2
+            # A.RandomScale(scale_limit=(-0.9, 1), p=1), #LargeScaleJitter from scale of 0.1 to 2
             A.PadIfNeeded(img_size, img_size, border_mode=0), #pads with image in the center, not the top left like the paper
-            A.Resize(img_size, img_size, p=1),
+            #A.Resize(img_size, img_size, p=1),
+            A.LongestMaxSize(max_size=img_size, interpolation=1),
             A.HorizontalFlip(p=0.5),
             A.Rotate(limit=15, p=0.5),
         ], bbox_params=A.BboxParams(format="coco", min_visibility=0.05))
 
-    def _get_bbox(self, mask):
+    def _get_bbox(self, img, mask):
         rows = np.any(mask, axis=1)
         cols = np.any(mask, axis=0)
         assert len(np.where(rows)[0]) > 0
         ymin, ymax = np.where(rows)[0][[0, -1]]
         xmin, xmax = np.where(cols)[0][[0, -1]]
         assert ymax >= ymin and xmax >= xmin
-        return [int(xmin), int(ymin), int(xmax)-int(xmin), int(ymax)-int(ymin)]
+        img = img[ymin:ymax+1, xmin:xmax+1]
+        mask = mask[ymin:ymax+1, xmin:xmax+1]
+        rows = np.any(mask, axis=1)
+        cols = np.any(mask, axis=0)
+        assert len(np.where(rows)[0]) > 0
+        ymin, ymax = np.where(rows)[0][[0, -1]]
+        xmin, xmax = np.where(cols)[0][[0, -1]]
+        return img, [int(xmin), int(ymin), int(xmax)-int(xmin), int(ymax)-int(ymin)], mask
 
     def __len__(self):
         return len(self.syn_imgs)
@@ -92,7 +100,7 @@ class SynData(Dataset):
         syn_mask = read_and_decompress(self.syn_lbls[idx])
         syn_mask = syn_mask.astype(np.uint8)
         #syn_bboxes = self._extract_bbox(syn_mask)
-        syn_bbox = self._get_bbox(syn_mask)
+        syn_img, syn_bbox, syn_mask = self._get_bbox(syn_img, syn_mask)
         syn_bbox = syn_bbox + [self.cls[idx]] # Add label to the bounding box # TODO: Change this to a more general solution
         output = {
             "image": syn_img,
