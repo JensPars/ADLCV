@@ -16,6 +16,7 @@ wandb/
 *.pptx
 
 sdxl-turbo/
+data-llm/
 
 generation_pipeline/fig/1/giraffe/img_263936987.jpg
 generation_pipeline/fig/1/giraffe/img_483911026.jpg
