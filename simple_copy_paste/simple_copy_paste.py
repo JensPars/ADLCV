@@ -313,7 +313,7 @@ def copy_paste_class(dataset_class):
         
         
 
-        image = (img_data["image"].clone().detach().float().requires_grad_(True))/255.0
+        image = (img_data["image"].clone().detach().float())/255.0 #.requires_grad_(True)
         bboxes = torch.tensor(np.array([torch.tensor(x[:4]) for x in img_data["bboxes"]]))
         #bboxes = tv_tensors.BoundingBoxes(bboxes,format="XYXY",canvas_size=image.shape[-2:])
         labels = torch.tensor(np.array([torch.tensor(x[-2]) for x in img_data["bboxes"]]))
