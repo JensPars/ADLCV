@@ -9,8 +9,25 @@ import torch
 from torchvision import tv_tensors
 from PIL import Image
 
+<<<<<<< HEAD:generation_pipeline/coco/cp_playground.py
 class CPdataset():
     def __init__(self, instance_retriever, layering:str, n_instances:int, min_visible_pct:float=1.0, min_visible_pixels:int = 32):
+=======
+class InstanceRetriever():
+    def __init__(self, instance_pool:torch.utils.data.Dataset):
+        self.instance_pool = instance_pool
+
+    def get_instances(self, n_instances:int):
+        n_instances = random.randint(1, n_instances) 
+        #? Sample the indicies such without replacement, such that it is unique instances. 
+        instances = []
+        for i in range(n_instances):
+            instances.append(self.instance_pool[random.randint(0, len(self.instance_pool)-1)])
+        return instances
+class InstanceCopyPaste():
+
+    def __init__(self, instance_retriever:InstanceRetriever, layering:str, n_instances:int, min_visible_pct:float=1.0, min_visible_keyspoint:int = 10):
+>>>>>>> origin/main:instance_copy_paste/copy_paste.py
         self.instance_retriever = instance_retriever
         self.min_visible_pct = min_visible_pct
         self.n_instances = n_instances
@@ -49,7 +66,11 @@ class CPdataset():
         if isinstance(background, Image.Image): 
             background = np.array(background)
         if labels != []:
+<<<<<<< HEAD:generation_pipeline/coco/cp_playground.py
             background = self._blend_masks2background(image, background, adjusted_masks, sigma = 1.0)
+=======
+            background = self._blend_masks2background(image, background, adjusted_masks, sigma = 5.0)
+>>>>>>> origin/main:instance_copy_paste/copy_paste.py
 
         return background, {"masks": adjusted_masks, "boxes": adjusted_bboxes, "labels": adjusted_labels}
 
@@ -95,9 +116,17 @@ class CPdataset():
         adjusted_bboxes = []
         adjusted_masks = []
         adjusted_labels = []
+<<<<<<< HEAD:generation_pipeline/coco/cp_playground.py
         
         for i in range(len(visible_pixels_per_mask)):
             if visible_pixels_per_mask[i] > self.min_visible_pixels:
+=======
+        #assert len(new_masks) == len(bboxes), "Number of masks and bounding boxes do not match."
+        assert len(new_masks) == len(visible_keypoints_per_mask), "Number of masks and visible keypoints do not match."
+        
+        for i in range(len(visible_keypoints_per_mask)):
+            if visible_keypoints_per_mask[i] > self.min_visible_keyspoint:
+>>>>>>> origin/main:instance_copy_paste/copy_paste.py
                 x1, y1, x2, y2 = self.extract_bbox(new_masks[i])
                 if (x2-x1 > 0) and (y2-y1 > 0): # validate bounding box
                     adjusted_masks.append(new_masks[i])

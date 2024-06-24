@@ -66,6 +66,9 @@ map_val = map_dict['map']
 # Log Mean Average Precision to W&B
 wandb.log({"Test mAP": map_val})
 
+# log map_dict
+wandb.log(map_dict)
+
 # Print out Mean Average Precision
 print(f"Test mAP: {map_val:.4f}")
 
