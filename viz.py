@@ -17,7 +17,7 @@ from instance_copy_paste.dataset import SynData, COCO_DETECTION
 from instance_copy_paste.copy_paste import InstanceCopyPaste, InstanceRetriever
 from train_mask_rcnn_lightning import plot_images_with_boxes_and_masks, DM
 
-dm = DM(batch_size=2, syn_data=True)
+dm = DM(batch_size=2, syn_data=True, num_workers=0)
 dm.setup()
 path2imgs = "/zhome/ca/9/146686/ADLCV/data/data-llm"
 

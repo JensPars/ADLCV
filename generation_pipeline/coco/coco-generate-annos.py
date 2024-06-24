@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 classes = {'bear': 903}
 
 # Load the COCO annotation file
-coco_annotation_file = '/work3/s194649/annotations/instances_val2017.json'
+coco_annotation_file = '/work3/s194649/annotations/instances_train2017.json'
 coco = COCO(coco_annotation_file)
 
 # Create a new dictionary to store the subset annotations

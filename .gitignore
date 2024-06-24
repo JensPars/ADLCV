@@ -1,3 +1,5 @@
+
+*.ckpt
 lightning_logs/
 .env
 venv
@@ -919,3 +921,9 @@ lightning_logs/version_2/hparams.yaml
 lightning_logs/version_3/config.yaml
 lightning_logs/version_3/events.out.tfevents.1715294118.n-62-20-9.29085.0
 lightning_logs/version_3/hparams.yaml
+subsets/instances_train2017_subset_0.1.json
+subsets/instances_train2017_subset_0.5.json
+subsets/instances_train2017_subset_0.25.json
+subsets/instances_train2017_subset_0.75.json
+subsets/instances_train2017_subset_1.0.json
+core.2654

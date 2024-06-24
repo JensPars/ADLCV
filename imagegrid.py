@@ -11,10 +11,11 @@ tens = ToTensor()
 pil = ToPILImage()
 imgpaths = []
 for name in ["car", "boat", "bus"]:
-    imgdir = f"data/data-llm/{name}/*.jpg"
+    imgdir = f"data2/sdxl-turbo/{name}/*.jpg"
+    #imgdir = f"data/sdxl-turbov1/{name}/*.jpg"
     imgpath = glob(imgdir)
     # sample random 10 images
-    imgpaths += list(random.choice(imgpath, 10))
+    imgpaths += list(random.choice(imgpath, 10, replace=False))
     
 imgs = []
 for img in imgpaths:

@@ -1,0 +1,76 @@
+seed_everything: true
+trainer:
+  accelerator: gpu
+  strategy: auto
+  devices: auto
+  num_nodes: 1
+  precision: 16-mixed
+  logger:
+    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    dict_kwargs:
+      project: "copy-paste-project"
+      name: "100paste10 - lr 3.0e-04 - batch size 32"
+      save_dir: "copy-paste-project"
+  callbacks: 
+    class_path: lightning.pytorch.callbacks.ModelCheckpoint
+    dict_kwargs:
+      monitor: 'val_mAP'
+      mode: 'max'
+      save_top_k: 3
+      save_last: true
+      save_weights_only: false
+      filename: null
+      verbose: false
+      auto_insert_metric_name: true
+      dirpath: null
+      filename: null
+    class_path: lightning.pytorch.callbacks.LearningRateMonitor
+    dict_kwargs:
+      logging_interval: 'epoch'
+      
+  fast_dev_run: false
+  max_epochs: 64
+  min_epochs: null
+  max_steps: -1
+  min_steps: null
+  max_time: null
+  limit_train_batches: null
+  limit_val_batches: null
+  limit_test_batches: null
+  limit_predict_batches: null
+  overfit_batches: 0.0
+  val_check_interval: null
+  check_val_every_n_epoch: 1
+  num_sanity_val_steps: null
+  log_every_n_steps: null
+  enable_checkpointing: null
+  enable_progress_bar: null
+  enable_model_summary: null
+  accumulate_grad_batches: 1
+  gradient_clip_val: null
+  gradient_clip_algorithm: null
+  deterministic: null
+  benchmark: null
+  inference_mode: true
+  use_distributed_sampler: true
+  profiler: null
+  detect_anomaly: false
+  barebones: false
+  plugins: null
+  sync_batchnorm: false
+  reload_dataloaders_every_n_epochs: 0
+  default_root_dir: null
+model:
+  lr: 3.0e-04
+  pretrained_backbone: true
+data:
+  data_dir: data/data-llm
+  batch_size: 32
+  data_fraction: 1.0
+  syn_data: false
+  copy_paste: false
+  num_workers: 15
+  annFile_src: subsets/instances_train2017_subset_1.0.json
+  annFile_tgt: subsets/instances_train2017_subset_0.1.json
+  root: data/data-llm
+ckpt_path: copy-paste-project/copy-paste-project/hkytv7op/checkpoints/epoch=29-step=11010.ckpt
