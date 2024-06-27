@@ -1,0 +1,15 @@
+data:
+  data_dir: data/data-llm
+  syn_data: false
+  copy_paste: false
+  annFile_src: subsets/instances_train2017_subset_1.0.json
+  annFile_tgt: subsets/instances_train2017_subset_1.0.json
+  root: data/data-llm
+
+trainer:
+  logger:
+    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    dict_kwargs:
+      project: "copy-paste-project"
+      name: "100 - MobileNet"
+      save_dir: "copy-paste-project"

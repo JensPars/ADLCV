@@ -1,0 +1,4 @@
+model:
+  lr: 3.0e-04
+  model_type: resnet-maskrcnn
+  pretrained_backbone: true
