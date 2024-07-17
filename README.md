@@ -1,2 +1,1 @@
-![Poster](path/to/ADLCV_POSTER.pdf)
-
+![Poster](ADLCV_POSTER.pdf)
