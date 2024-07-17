@@ -169,8 +169,8 @@ class DM(pl.LightningDataModule):
         syn_data: bool = False,
         copy_paste: bool = False,
         num_workers: int = 0,
-        annFile_src: str = "data/data-llm/annotations/instances_default.json",
-        annFile_tgt: str = "data/data-llm/annotations/instances_default.json",
+        annFile_src: str = "subsets/instances_train2017_subset_0.1.json",
+        annFile_tgt: str = "subsets/instances_train2017_subset_0.1.json",
         root: str = "data/data-llm",
         img_sz = 1024,
     ):
@@ -187,21 +187,31 @@ class DM(pl.LightningDataModule):
         self.syn_data = syn_data
         self.copy_paste = copy_paste
         self.num_workers = num_workers
+        self.img_sz = img_sz
+        self.annFile_src = annFile_src
+        self.annFile_tgt = annFile_tgt
         
-        if self.copy_paste:
-            root_dir = os.environ.get("COCO_DATA_DIR_TRAIN")
+    
+    def setup(self, stage=None):
+        if stage  == "fit":
+            if self.copy_paste:
+                root_dir = os.environ.get("COCO_DATA_DIR_TRAIN")
+                transform = T.Compose([T.ToImage(), T.ToDtype(torch.float32, scale=True)])
+                target = CocoDetection(root=root_dir, annFile=self.annFile_tgt, transform=transform)
+                target = datasets.wrap_dataset_for_transforms_v2(target, target_keys=["boxes", "labels", "masks"])
+                source = SubsampleCOCO(root_dir, self.annFile_src, transform=transform)
+                self.train = PasteDataset(source, target, self.img_sz)
+            else:
+                lsj = T.Compose([T.ScaleJitter((self.img_sz, self.img_sz), (0.1, 2.0)), adaptive_pad(self.img_sz, self.img_sz),  T.RandomCrop([self.img_sz,self.img_sz]), T.SanitizeBoundingBoxes()]) 
+                self.train = CoCoDet(os.environ.get("COCO_DATA_DIR_TRAIN"), self.annFile_tgt, transform=lsj)
+            
+            transform = T.Compose([T.ToImage(), T.ToDtype(torch.float32, scale=True)]) 
+            self.val = CoCoDet(os.environ.get("COCO_DATA_DIR_VAL"), os.environ.get("COCO_VAL_ANN"), transform=transform)
+        
+        elif stage == "test":
             transform = T.Compose([T.ToImage(), T.ToDtype(torch.float32, scale=True)])
-            target = CocoDetection(root=root_dir, annFile=annFile_tgt, transform=transform)
-            target = datasets.wrap_dataset_for_transforms_v2(target, target_keys=["boxes", "labels", "masks"])
-            source = SubsampleCOCO(root_dir, annFile_src, transform=transform)
-            self.train = PasteDataset(source, target, img_sz)
-        else:
-            lsj = T.Compose([T.ScaleJitter((img_sz, img_sz), (0.1, 2.0)), adaptive_pad(img_sz, img_sz),  T.RandomCrop([img_sz,img_sz]), T.SanitizeBoundingBoxes()]) 
-            self.train = CoCoDet(os.environ.get("COCO_DATA_DIR_TRAIN"), annFile_tgt, transform=lsj)
+            self.test = CoCoDet(os.environ.get("COCO_DATA_DIR_TRAIN"), self.annFile_tgt, transform=transform)
         
-        transform = T.Compose([T.ToImage(), T.ToDtype(torch.float32, scale=True)]) 
-        self.val = CoCoDet(os.environ.get("COCO_DATA_DIR_VAL"), os.environ.get("COCO_VAL_ANN"), transform=transform)
-       
 
 
     def train_dataloader(self):
@@ -248,7 +258,7 @@ class DM(pl.LightningDataModule):
         """
         return DataLoader(
             self.test,
-            batch_size=self.batch_size,
+            batch_size=2,
             shuffle=False,
             num_workers=self.num_workers,   
             collate_fn=lambda x: tuple(zip(*x)),

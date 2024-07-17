@@ -93,10 +93,10 @@ class MaskedData(Dataset):
             cropped_mask = self._crop_image(
                 Image.fromarray(mask.astype(np.uint8)), ann["bbox"]
             )
-
-            cropped_masked_img = (
-                np.array(cropped_img) * np.array(cropped_mask)[:, :, None]
-            )
+            cropped_masked_img = np.array(cropped_img)
+            #cropped_masked_img = (
+            #    np.array(cropped_img) * np.array(cropped_mask)[:, :, None]
+            #)
             cropped_masked_img = Image.fromarray(cropped_masked_img.astype(np.uint8))
 
             if self.transform:

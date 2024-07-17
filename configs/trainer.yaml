@@ -22,7 +22,7 @@ trainer:
     dict_kwargs:
       logging_interval: 'step'
       
-  max_steps: 90000
+  max_steps: 180000
   min_steps: null
   max_time: null
   limit_train_batches: null
@@ -53,7 +53,7 @@ trainer:
   default_root_dir: null
 
 data:
-  num_workers: 15
+  num_workers: 7
   batch_size: 16
   img_sz: 1024
   

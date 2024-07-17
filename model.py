@@ -1,10 +1,15 @@
+import random
+import string
 import torch
+import torchvision
 import lightning.pytorch as pl
+import numpy as np
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from torchvision.models.detection import maskrcnn_resnet50_fpn_v2, fasterrcnn_mobilenet_v3_large_fpn
 from torchvision.models import ResNet50_Weights, MobileNet_V3_Large_Weights
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from torch.optim.lr_scheduler import SequentialLR, LinearLR, CosineAnnealingLR
+from torchvision.models.detection.transform import resize_boxes
 
 def linear_warmup_cosine_annealing(optimizer, warmup_steps, total_steps, min_lr=3e-5):
     # Linear warmup
@@ -35,15 +40,19 @@ class MaskRCNNModel(pl.LightningModule):
                 self.model = maskrcnn_resnet50_fpn_v2(
                     weights_backbone=ResNet50_Weights.DEFAULT, num_classes=91
                 )
+                print("Using ResNet50 backbone /w pretrained weights.")
             else:
                 self.model = maskrcnn_resnet50_fpn_v2(num_classes=91)
+                print("Using ResNet50 backbone /wo pretrained weights.")
                 
         elif model_type == "mobilenet-maskrcnn":
             if pretrained_backbone:
                 self.model = fasterrcnn_mobilenet_v3_large_fpn(weights_backbone=MobileNet_V3_Large_Weights.IMAGENET1K_V2,
                                                                                             num_classes=91)
+                print("Using MobileNetV3 backbone /w pretrained weights.")
             else:
                 self.model = fasterrcnn_mobilenet_v3_large_fpn(num_classes=91)
+                print("Using MobileNetV3 backbone /wo pretrained weights.")
         else:
             raise ValueError(f"Model type {model_type} not recognized.")   
             
@@ -72,17 +81,49 @@ class MaskRCNNModel(pl.LightningModule):
         return losses
 
     def test_step(self, batch, batch_idx):
-        images, targets = batch
-        outputs = self.forward(images)  # Get model predictions
-        # update the Mean Average Precision metric
-        self.map_metric.update(outputs, targets)
-        return outputs
+        raw_images, targets = batch
+        original_image_sizes = []
+        for img in raw_images:
+            val = img.shape[-2:]
+            torch._assert(
+                len(val) == 2,
+                f"expecting the last two dimensions of the Tensor to be H and W instead got {img.shape[-2:]}",
+            )
+            original_image_sizes.append((val[0], val[1]))
+        outputs = self.forward(raw_images)  # Get model predictions
+        pred_boxes = [output['boxes'] for output in outputs]
+        images,_ = self.model.transform(raw_images, targets)
+        features = self.model.backbone(images.tensors)
+        boxes, losses = self.model.rpn(images, features)
+        #detections = self.model.transform.postprocess(boxes, images.image_sizes, original_image_sizes)
+        # calculate the iou between the predicted boxes and the targets
+        #iou = self.model.rpn.iou(boxes, targets)
+        for img, box, trg, img_shp, org_shp, pred_box in zip(raw_images, boxes, targets, images.image_sizes, original_image_sizes, pred_boxes):
+            box = resize_boxes(box, img_shp, org_shp)
+            iou = torchvision.ops.box_iou(box, trg['boxes'])
+           # print(torchvision.ops.box_iou(box, pred_box).max())
+           # print(iou.max())
+            iou = iou.max(axis=1)[0].unsqueeze(1)
+            # save boxes and iou to txt
+            boxiou = torch.cat((box, iou),1)
+            # use random name, by generating random string
+            random_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+            # convert to numpy save boxiou
+            boxiou = boxiou.cpu().detach().numpy()
+            np.savetxt(f'image_outputs/boxiou_{random_string}.txt', boxiou)
+            #torch.save(boxiou, f'image_outputs/boxiou_{random_string}.pt')
+            # image to PIL
+            torchvision.transforms.ToPILImage()(img).save(f'image_outputs/img_{random_string}.png')
+            
+            
 
-    def on_test_epoch_end(self):
-        # compute the Mean Average Precision
-        map_value = self.map_metric.compute()
-        self.log("map", map_value)
-        self.map_metric.reset()
+    #def on_test_epoch_end(self):
+    #    # compute the Mean Average Precision
+    #    map_value = self.map_metric.compute()
+    #    self.log("map", map_value)
+    #    self.map_metric.reset()
+    
+        
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)

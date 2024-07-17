@@ -25,7 +25,11 @@ class LoggerSaveConfigCallback(SaveConfigCallback):
         )  # Required for proper reproducibility
         # yaml to dict
         config = yaml.safe_load(config)
-        trainer.logger.experiment.config.update({"config": config})
+        try:
+            trainer.logger.experiment.config.update({"config": config})
+            
+        except:
+            pass
 
 
 def cli_main():
