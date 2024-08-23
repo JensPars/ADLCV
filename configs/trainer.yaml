@@ -53,7 +53,7 @@ trainer:
   default_root_dir: null
 
 data:
-  num_workers: 7
+  num_workers: 31
   batch_size: 16
   img_sz: 1024
   
